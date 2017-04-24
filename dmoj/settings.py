@@ -324,7 +324,12 @@ STATIC_URL = '/static/'
 STATIC_ROOT = '/vagrant/dmoj/site/dmoj/static'
 
 # Define a cache
-CACHES = {}
+CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': '/var/tmp/django_cache'
+        }
+}
 
 # Authentication
 AUTHENTICATION_BACKENDS = (
