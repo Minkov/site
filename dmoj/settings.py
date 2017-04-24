@@ -321,6 +321,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'resources'),
 ]
 STATIC_URL = '/static/'
+STATIC_ROOT = '/vagrant/dmoj/site/dmoj/static'
 
 # Define a cache
 CACHES = {}
