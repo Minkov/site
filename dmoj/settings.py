@@ -277,8 +277,12 @@ MARKDOWN_STYLES = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dmoj',
+        'USER': 'vagrant',
+        'PASSWORD': 'vagrant',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
