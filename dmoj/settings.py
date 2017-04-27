@@ -277,12 +277,8 @@ MARKDOWN_STYLES = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dmoj',
-        'USER': 'vagrant',
-        'PASSWORD': 'vagrant',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
@@ -325,15 +321,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'resources'),
 ]
 STATIC_URL = '/static/'
-# STATIC_ROOT = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static');
+
 # Define a cache
-CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': '/var/tmp/django_cache'
-        }
-}
+CACHES = {}
 
 # Authentication
 AUTHENTICATION_BACKENDS = (
