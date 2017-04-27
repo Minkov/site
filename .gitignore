@@ -1,6 +1,7 @@
 .idea
 *.sqlite3
 *.pyc
+*.pyo
 *~
 # dmoj/local_settings.py
 resources/style.css
