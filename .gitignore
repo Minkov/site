@@ -7,3 +7,8 @@
 resources/style.css
 resources/content-description.css
 sass_processed
+
+
+# Node.js
+
+node_modules

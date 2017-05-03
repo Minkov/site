@@ -1,0 +1,24 @@
+{
+  "name": "dmoj-site-sockets",
+  "version": "1.0.0",
+  "description": "Site [![Documentation Status](https://readthedocs.org/projects/dmoj/badge/?version=latest)](http://dmoj.readthedocs.org/en/latest/?badge=latest) [![Slack](https://slack.dmoj.ca/badge.svg)](https://slack.dmoj.ca) ===== Django [AGPLv3](https://github.com/DMOJ/site/blob/master/LICENSE) contest judge frontend for the [DMOJ judge](https://github.com/DMOJ/judge) system. See it live at https://dmoj.ca/.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/minkov/site.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/minkov/site/issues"
+  },
+  "homepage": "https://github.com/minkov/site#readme",
+  "dependencies": {
+    "qu": "^0.1.0",
+    "simplesets": "^1.2.0",
+    "ws": "^2.3.1"
+  }
+}
