@@ -10,6 +10,8 @@
 # SECURITY WARNING: keep the secret key used in production secret!
 # You may use <http://www.miniwebtool.com/django-secret-key-generator/>
 # to generate this key.
+import socket
+HOSTNAME = socket.gethostname()
 SECRET_KEY = 'Purple Unicorn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -17,7 +19,11 @@ DEBUG = True  # Change to False once you are done with runserver testing.
 
 # Uncomment and set to the domain names this site is intended to serve.
 # You must do this once you set DEBUG to False.
-#ALLOWED_HOSTS = ['dmoj.ca']
+ALLOWED_HOSTS = [
+        HOSTNAME,
+        # u'10.0.2.15',
+        u'localhost'
+]
 
 # Optional apps that DMOJ can make use of.
 INSTALLED_APPS += (
@@ -144,7 +150,9 @@ TERMS_OF_SERVICE_URL = '//dmoj.ca/tos' # Use a flatpage.
 # The judge connection address and port; where the judges will connect to the site.
 # You should change this to something your judges can actually connect to 
 # (e.g., a port that is unused and unblocked by a firewall).
-BRIDGED_JUDGE_ADDRESS = [('localhost', 9999)]
+
+BRIDGED_JUDGE_ADDRESS = [(u'10.0.2.15', 3000)]
+# BRIDGED_JUDGE_ADDRESS = [(HOSTNAME, 3000)]
 
 # The bridged daemon bind address and port to communicate with the site.
 #BRIDGED_DJANGO_ADDRESS = [('localhost', 9998)]
