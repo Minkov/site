@@ -22,7 +22,9 @@ DEBUG = True  # Change to False once you are done with runserver testing.
 ALLOWED_HOSTS = [
         HOSTNAME,
         # u'10.0.2.15',
-        u'localhost'
+	u'127.0.0.1',
+        u'localhost',
+	u'192.168.168.27'
 ]
 
 # Optional apps that DMOJ can make use of.
@@ -40,6 +42,16 @@ CACHES = {
 
 # Your database credentials. Only MySQL is supported by DMOJ.
 # Documentation: <https://docs.djangoproject.com/en/1.9/ref/databases/>
+# DATABASES = {
+#	'default': {
+#		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#		'NAME': 'dmoj',
+#		'USER': 'dmoj',
+#		'PASSWORD': 'dmoj',
+#		'HOST': '127.0.0.1',
+#		'PORT': ''
+#	}
+#}
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -151,7 +163,8 @@ TERMS_OF_SERVICE_URL = '//dmoj.ca/tos' # Use a flatpage.
 # You should change this to something your judges can actually connect to 
 # (e.g., a port that is unused and unblocked by a firewall).
 
-BRIDGED_JUDGE_ADDRESS = [(u'10.0.2.15', 3000)]
+# BRIDGED_JUDGE_ADDRESS = [(u'127.0.0.1', 3000)]
+BRIDGED_JUDGE_ADDRESS = [(u'10.0.2.15', 9999)]
 # BRIDGED_JUDGE_ADDRESS = [(HOSTNAME, 3000)]
 
 # The bridged daemon bind address and port to communicate with the site.
