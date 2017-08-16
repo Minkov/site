@@ -15,7 +15,7 @@ a
   &:hover
     color: #0645ad
   &:active
-    color: #faa700
+    color: #296700
 
 img
   max-width: 100%
@@ -169,7 +169,8 @@ header
   background: linear-gradient(rgba(0, 0, 0, 0.5), transparent)
 
 #nav-container
-  background: #3B3B3B
+  background: #43a700
+  text-align: center
   // opacity: 0.77
   // filter: alpha(opacity=77)
   height: 100%
@@ -179,6 +180,8 @@ header
   top: 0px
   left: 0px
   right: 0px
+
+  // height: 70px
 
 nav
   position: relative
@@ -202,8 +205,10 @@ nav
       text-transform: uppercase
       position: relative
       &.home-nav-element a
-        padding: 0
-        height: 44px
+        padding: 0 !important
+        display: inline-block
+        height: 100%
+
         &:hover
           border-bottom: none
           padding-top: 0
@@ -223,7 +228,7 @@ nav
           margin: 0
         &.active
           color: #FFF
-          background: #2980b9
+          background: #296700
         .nav-expand
           display: none
       ul
@@ -252,6 +257,7 @@ nav
         border-bottom: 0
         padding-top: 0
         padding-bottom: 0
+        padding: 0
         background: transparent
 
 hr
@@ -497,8 +503,14 @@ math
 
 @media not all and (max-width: 760px)
   #nav-list
-    display: block !important
+    display: inline-block !important
+    width: 1300px
+    max-width: 100%
+    text-align: left
+
     li
+      &>a, &>span
+        padding: 15px
       &.home-menu-item
         display: none
       &:not(:hover) > ul

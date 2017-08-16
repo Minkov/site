@@ -129,7 +129,6 @@ html(lang=LANGUAGE_CODE)
                     // Divider
                     li.home-nav-element
                         span(style='width: 1px; vertical-align: middle; padding-left: 3px; display: inline-block; height: 32px; margin-right: 1px; border-right: 3px solid rgba(255, 255, 255, 0.15);')
-                    li.home-menu-item: a.nav-home(href='{% url "home" %}') {% trans "Home" %}
                     - recursetree nav_bar
                         li
                             a(href=node.path, class='nav-{{ node.key }}{% if node.key in nav_tab %} active{% endif %}')
@@ -139,11 +138,9 @@ html(lang=LANGUAGE_CODE)
                             if not node.is_leaf_node
                                 ul {{ children }}
                     - endrecursetree
-                span#user-links
                     if request.user.is_authenticated
-                        ul: li
-                            a(href='{% url "user_page" %}'): span
-                                img(src='{% gravatar_url request.user.email 32 %}', height='24', width='24')
+                        li
+                            a(href='{% url "user_page" %}'): span                                
                                 span
                                     - blocktrans with username=request.user.username
                                         | Hello, #[b {{ username }}].
@@ -156,12 +153,11 @@ html(lang=LANGUAGE_CODE)
                                 else
                                     li: a(href='{% url "auth_logout" %}?next=') {% trans "Log out" %}
                     else
-                        span.anon
+                        li
                             a(href='{% url "auth_login" %}?next={{ LOGIN_RETURN_PATH|urlencode }}')
                                 b {% trans "Login" %}
                             | &nbsp;|&nbsp;
                             a(href='{% url "registration_register" %}') {% trans "Register" %}
-            #nav-shadow
         if IN_CONTEST
             #contest-info
                 a(href='{% url "contest_view" CONTEST.contest.key %}', style='vertical-align: middle;')
