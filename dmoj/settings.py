@@ -327,11 +327,12 @@ CACHES = {}
 
 # Authentication
 AUTHENTICATION_BACKENDS = (
+    'judge.telerik_academy_auth.RemoteUserBackend',
     'social.backends.google.GoogleOAuth2',
     'social.backends.dropbox.DropboxOAuth2',
     'social.backends.facebook.FacebookOAuth2',
     'judge.social_auth.GitHubSecureEmailOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
 )
 
 SOCIAL_AUTH_PIPELINE = (
