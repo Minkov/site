@@ -204,15 +204,18 @@ nav
       color: #FFF
       text-transform: uppercase
       position: relative
-      &.home-nav-element a
-        padding: 0 !important
-        display: inline-block
-        height: 100%
+      &.home-nav-element
+        max-width: 160px
 
-        &:hover
-          border-bottom: none
-          padding-top: 0
-          padding-bottom: 0
+        a
+          padding: 0 !important
+          display: inline-block
+          height: 100%
+
+          &:hover
+            border-bottom: none
+            padding-top: 0
+            padding-bottom: 0
       a
         display: inline-block
         text-decoration: none
@@ -228,7 +231,7 @@ nav
           margin: 0
         &.active
           color: #FFF
-          background: #296700
+          background: rgba(0, 0, 0, 0.2)
         .nav-expand
           display: none
       ul

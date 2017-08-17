@@ -190,14 +190,5 @@ html(lang=LANGUAGE_CODE)
                 div#announcement #{i18n_config.announcement|safe}
             block bodyend
             footer: span#footer-content
-                if i18n_config.footer
-                    | #{i18n_config.footer|safe}
-                    = ' | '
-                form(action='{% url "set_language" %}', method='post', style='display: inline')
-                    - csrf_token
-                    input(name='next', type='hidden', value=request.get_full_path())
-                    select(name='language', onchange='form.submit()', style='height: 1.5em')
-                        - get_language_info_list for LANGUAGES as languages
-                        each language in languages
-                            option(value=language['code'], selected=('' if language['code'] == LANGUAGE_CODE else None))
-                                | #{language.name_local} (#{language.code})
+                | Telerik Academy
+                | Power by <a href="https://github.com/minkov/site">DMOJ</a>
