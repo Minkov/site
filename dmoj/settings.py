@@ -301,7 +301,7 @@ EVENT_DAEMON_KEY = None
 
 LANGUAGE_CODE = 'en'
 TIME_ZONE = 'UTC'
-DEFAULT_USER_TIME_ZONE = 'America/Toronto'
+DEFAULT_USER_TIME_ZONE = 'Europe/Sofia'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -357,6 +357,8 @@ SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 SOCIAL_AUTH_SLUGIFY_FUNCTION = 'judge.social_auth.slugify_username'
 
 JUDGE_AMQP_PATH = None
+
+API_KEY = '3d33a038e0dbcaa7121c4f133dc474d7'
 
 try:
     with open(os.path.join(os.path.dirname(__file__), 'local_settings.py')) as f:
