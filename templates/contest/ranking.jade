@@ -5,7 +5,6 @@ extends user/base-users
 block title_ruler
 
 block title_row
-    - var tab = 'ranking'
     - var title = contest.name
     include contest/contest-tabs
 
@@ -150,8 +149,13 @@ block users_media
             white-space: nowrap;
         }
 
-        #search, #search + .select2 {
+        #search-contest, #search-contest + .select2 {
             margin-top: 0.5em;
+        }
+
+        #search-contest {
+            width: 200px;
+            height: 2.3em;
         }
 
 block users_js_media
@@ -215,11 +219,11 @@ block users_js_media
     script(type='text/javascript').
         $(function () {
             var url = '{% url "contest_participation" contest.key "__username__" %}';
-            var placeholder = $('#search').replaceWith($('<select/>').attr({
-                id: 'search'
+            var placeholder = $('#search-contest').replaceWith($('<select/>').attr({
+                id: 'search-contest'
             })).attr('placeholder');
 
-            $('#search').select2({
+            $('#search-contest').select2({
                 placeholder: placeholder,
                 ajax: {
                     url: '{% url "contest_user_search_select2_ajax" contest.key %}'
@@ -245,13 +249,11 @@ block users_js_media
     include contest/media-js
 
 block users_table
-    //if contest.start_time <= now or perms.judge.see_private_contest
-    //    a(href='{% url "contest_participation_own" contest.key %}') {% trans "My participation" %}
-    //    if has_select2
-    //        br
-    //        input#search(type='text', placeholder='{% trans "View user participation" %}')
-    //    hr
-    input#show-organizations-checkbox(type='checkbox')
-    label(for="show-organizations-checkbox") {% trans "Show organizations" %}
+    div(style='margin-bottom: 0.5em')
+        if tab == 'participation'
+            if contest.start_time <= now or perms.judge.see_private_contest
+                input#search-contest(type='text', placeholder='{% trans "View user participation" %}')
+        input#show-organizations-checkbox(type='checkbox', style='vertical-align: bottom')
+        label(for='show-organizations-checkbox', style='vertical-align: bottom') {% trans "Show organizations" %}
 
     include contest/ranking-table

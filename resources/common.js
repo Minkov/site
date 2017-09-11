@@ -1,5 +1,5 @@
 // IE 8
-if (!Array.indexOf) {
+if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (obj) {
         for (var i = 0; i < this.length; i++) {
             if (this[i] == obj) {
@@ -8,6 +8,24 @@ if (!Array.indexOf) {
         }
         return -1;
     }
+}
+
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function (searchString, position) {
+        return this.substr(position || 0, searchString.length) === searchString;
+    };
+}
+
+if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function (searchString, position) {
+        var subjectString = this.toString();
+        if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+            position = subjectString.length;
+        }
+        position -= searchString.length;
+        var lastIndex = subjectString.lastIndexOf(searchString, position);
+        return lastIndex !== -1 && lastIndex === position;
+    };
 }
 
 // http://stackoverflow.com/a/1060034/1090657
@@ -217,7 +235,7 @@ window.register_update_relative = function (get_times, show_relative, interval) 
     return update_relative_time;
 };
 
-$(function() {
+$(function () {
     $('form').submit(function (evt) {
         // Prevent multiple submissions of forms, see #565
         $("input[type='submit']").attr("disabled", "true");
@@ -301,5 +319,28 @@ $(function () {
     $("a.close").click(function () {
         var $closer = $(this);
         $closer.parent().fadeOut(200);
+    });
+});
+
+$.fn.textWidth = function () {
+    var html_org = $(this).html();
+    var html_calc = '<span style="white-space: nowrap;">' + html_org + '</span>';
+    $(this).html(html_calc);
+    var width = $(this).find('span:first').width();
+    $(this).html(html_org);
+    return width;
+};
+
+$(function () {
+    $('.tabs').each(function () {
+        var $this = $(this), $h2 = $(this).find('h2'), $ul = $(this).find('ul');
+        var cutoff = ($h2.textWidth() || 400) + 20, handler;
+        $ul.children().each(function () {
+            cutoff += $(this).width();
+        });
+        $(window).resize(handler = function () {
+            $this.toggleClass('tabs-no-flex', $this.width() < cutoff);
+        });
+        handler();
     });
 });

@@ -45,6 +45,7 @@ def get_contest_problem(problem, profile):
     except ObjectDoesNotExist:
         return None
 
+
 def get_contest_submission_count(problem, profile):
     return profile.current_contest.submissions.exclude(submission__status__in=['IE']).filter(problem__problem__code=problem).count()
 
@@ -191,7 +192,7 @@ class ProblemDetail(ProblemMixin, SolvedProblemMixin, CommentedDetailView):
 
         if not self.object.og_image or not self.object.summary:
             metadata = generate_opengraph('generated-meta-problem:%s:%d' % (context['language'], self.object.id),
-                                          context['description'])
+                                          context['description'], 'problem')
         context['meta_description'] = self.object.summary or metadata[0]
         context['og_image'] = self.object.og_image or metadata[1]
         return context
@@ -325,21 +326,22 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
                                                                                      self.request.LANGUAGE_CODE,
                                                                                      'problem__name')
         return [{
-                    'id': p['problem_id'],
-                    'code': p['problem__code'],
-                    'name': p['problem__name'],
-                    'i18n_name': p['i18n_name'],
-                    'group': {'full_name': p['problem__group__full_name']},
-                    'points': p['points'],
-                    'partial': p['partial'],
-                    'user_count': p['user_count'],
-                } for p in queryset.values('problem_id', 'problem__code', 'problem__name', 'i18n_name',
-                                           'problem__group__full_name', 'points', 'partial', 'user_count')]
+            'id': p['problem_id'],
+            'code': p['problem__code'],
+            'name': p['problem__name'],
+            'i18n_name': p['i18n_name'],
+            'group': {'full_name': p['problem__group__full_name']},
+            'points': p['points'],
+            'partial': p['partial'],
+            'user_count': p['user_count'],
+        } for p in queryset.values('problem_id', 'problem__code', 'problem__name', 'i18n_name',
+                                   'problem__group__full_name', 'points', 'partial', 'user_count')]
 
     def get_normal_queryset(self):
         filter = Q(is_public=True)
         if self.profile is not None:
-            filter |= Q(id__in=Problem.objects.filter(contest__users__user=self.profile).values('id').distinct())
+            filter |= Q(id__in=Problem.objects.filter(contest__users=self.profile.current_contest_id,
+                                                      contest__isnull=False).values('id').distinct())
             filter |= Q(authors=self.profile)
             filter |= Q(curators=self.profile)
             filter |= Q(testers=self.profile)
@@ -499,7 +501,7 @@ def problem_submit(request, problem=None, submission=None):
                 try:
                     contest_problem = form.cleaned_data['problem'].contests.get(contest=profile.current_contest.contest)
                 except ContestProblem.DoesNotExist:
-                    pass
+                    model = form.save()
                 else:
                     max_subs = contest_problem.max_submissions
                     if max_subs and get_contest_submission_count(problem, profile) >= max_subs:
@@ -537,8 +539,7 @@ def problem_submit(request, problem=None, submission=None):
         form_data = initial
     if 'problem' in form_data:
         form.fields['language'].queryset = (form_data['problem'].usable_languages.order_by('name', 'key')
-            .prefetch_related(
-            Prefetch('runtimeversion_set', RuntimeVersion.objects.order_by('priority'))))
+            .prefetch_related(Prefetch('runtimeversion_set', RuntimeVersion.objects.order_by('priority'))))
         problem_object = form_data['problem']
     if 'language' in form_data:
         form.fields['source'].widget.mode = form_data['language'].ace
@@ -549,15 +550,15 @@ def problem_submit(request, problem=None, submission=None):
     else:
         default_lang = request.user.profile.language
 
-    IN_CONTEST = profile.current_contest is not None
-    if IN_CONTEST:
-        submission_limit = problem_object.contests.get(contest=profile.current_contest.contest).max_submissions
-    else:
-        submission_limit = None
-    if submission_limit:
-        submissions_left = submission_limit - get_contest_submission_count(problem, profile)
-    else:
-        submissions_left = None
+    submission_limit = submissions_left = None
+    if profile.current_contest is not None:
+        try:
+            submission_limit = problem_object.contests.get(contest=profile.current_contest.contest).max_submissions
+        except ContestProblem.DoesNotExist:
+            pass
+        else:
+            if submission_limit:
+                submissions_left = submission_limit - get_contest_submission_count(problem, profile)
     return render(request, 'problem/submit.jade', {
         'form': form,
         'title': _('Submit to %(problem)s') % {
@@ -570,7 +571,6 @@ def problem_submit(request, problem=None, submission=None):
         }),
         'langs': Language.objects.all(),
         'no_judges': not form.fields['language'].queryset,
-        'IN_CONTEST': IN_CONTEST,
         'submission_limit': submission_limit,
         'submissions_left': submissions_left,
         'ACE_URL': ACE_URL,

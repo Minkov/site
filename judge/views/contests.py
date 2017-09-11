@@ -5,15 +5,13 @@ from functools import partial
 from itertools import chain
 from operator import attrgetter
 
-import pytz
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.db import connection, IntegrityError
-from django.db.models import Q, Min, Max
+from django.db.models import Q, Min, Max, Count
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -27,6 +25,8 @@ from django.views.generic.detail import BaseDetailView, DetailView
 from judge import event_poster as event
 from judge.comments import CommentedDetailView
 from judge.models import Contest, ContestParticipation, ContestTag, Profile
+from judge.models import Problem
+from judge.timezone import from_database_time
 from judge.utils.opengraph import generate_opengraph
 from judge.utils.ranker import ranker
 from judge.utils.views import TitleMixin, generic_message
@@ -138,7 +138,8 @@ class ContestMixin(object):
         context['is_organizer'] = self.is_organizer
 
         if not self.object.og_image or not self.object.summary:
-            metadata = generate_opengraph('generated-meta-contest:%d' % self.object.id, self.object.description)
+            metadata = generate_opengraph('generated-meta-contest:%d' % self.object.id,
+                                          self.object.description, 'contest')
         context['meta_description'] = self.object.summary or metadata[0]
         context['og_image'] = self.object.og_image or metadata[1]
 
@@ -189,6 +190,14 @@ class ContestDetail(ContestMixin, TitleMixin, CommentedDetailView):
 
     def get_title(self):
         return self.object.name
+
+    def get_context_data(self, **kwargs):
+        context = super(ContestDetail, self).get_context_data(**kwargs)
+        context['contest_problems'] = Problem.objects.filter(contests__contest=self.object) \
+            .order_by('contests__order').defer('description') \
+            .annotate(has_editorial=Count('solution')) \
+            .add_i18n_name(self.request.LANGUAGE_CODE)
+        return context
 
 
 class ContestJoin(LoginRequiredMixin, ContestMixin, BaseDetailView):
@@ -292,8 +301,8 @@ class ContestCalendar(TitleMixin, ContestListMixin, TemplateView):
 
     def get_table(self):
         calendar = Calendar(self.firstweekday).monthdatescalendar(self.year, self.month)
-        starts, ends, oneday = self.get_contest_data(timezone.make_aware(datetime.combine(calendar[0][0], time.min)),
-                                                     timezone.make_aware(datetime.combine(calendar[-1][-1], time.min)))
+        starts, ends, oneday = self.get_contest_data(make_aware(datetime.combine(calendar[0][0], time.min)),
+                                                     make_aware(datetime.combine(calendar[-1][-1], time.min)))
         return [[ContestDay(
             date=date, weekday=self.weekday_classes[weekday], is_pad=date.month != self.month,
             is_today=date == self.today, starts=starts[date], ends=ends[date], oneday=oneday[date],
@@ -374,8 +383,7 @@ def best_solution_state(points, total):
     return 'partial-score'
 
 
-def base_contest_ranking_list(contest, problems, queryset, for_user=None,
-                              tz=pytz.timezone(getattr(settings, 'TIME_ZONE', 'UTC'))):
+def base_contest_ranking_list(contest, problems, queryset, for_user=None):
     cursor = connection.cursor()
     cursor.execute('''
         SELECT part.id, cp.id, prob.code, MAX(cs.points) AS best, MAX(sub.date) AS `last`
@@ -388,7 +396,7 @@ def base_contest_ranking_list(contest, problems, queryset, for_user=None,
     '''.format(extra=('AND part.user_id = %s' if for_user is not None else
                                          'AND part.virtual = 0')),
                    (contest.id, contest.id) + ((for_user,) if for_user is not None else ()))
-    data = {(part, prob): (code, best, last and make_aware(last, tz)) for part, prob, code, best, last in cursor}
+    data = {(part, prob): (code, best, last and from_database_time(last)) for part, prob, code, best, last in cursor}
     cursor.close()
 
     problems = map(attrgetter('id', 'points', 'is_pretested'), problems)
@@ -400,7 +408,8 @@ def base_contest_ranking_list(contest, problems, queryset, for_user=None,
                              time=data[part, prob][2] - participation.start,
                              state=best_solution_state(data[part, prob][1], points),
                              is_pretested=is_pretested)
-            if data[part, prob][1] is not None else None for prob, points, is_pretested in problems])
+            if (part, prob) in data and data[part, prob][1] is not None else None
+            for prob, points, is_pretested in problems])
 
     return map(make_ranking_profile, queryset.select_related('user__user', 'rating')
                .defer('user__about', 'user__organizations__about'))
@@ -424,7 +433,7 @@ def get_participation_ranking_profile(contest, participation, problems):
                          state=best_solution_state(scoring[problem.id][0], problem.points),
                          is_pretested=problem.is_pretested)
         if problem.id in scoring else None for problem in problems
-        ])
+    ])
 
 
 def get_contest_ranking_list(request, contest, participation=None, ranking_list=contest_ranking_list,
@@ -476,6 +485,7 @@ def contest_ranking_view(request, contest, participation=None):
         'contest': contest,
         'last_msg': event.last(),
         'has_rating': contest.ratings.exists(),
+        'tab': 'ranking',
     }
 
     # TODO: use ContestMixin when this becomes a class-based view
@@ -537,7 +547,8 @@ def base_participation_list(request, contest, profile):
         'contest': contest,
         'last_msg': event.last(),
         'has_rating': False,
-        'rank_header': _('Participation')
+        'rank_header': _('Participation'),
+        'tab': 'participation',
     })
 
 

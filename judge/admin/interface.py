@@ -1,9 +1,9 @@
 from django.contrib import admin
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse_lazy
 from django.forms import ModelForm
 from django.utils.html import format_html
-from django.utils.translation import ugettext_lazy as _, ugettext
-from mptt.admin import MPTTModelAdmin
+from django.utils.translation import ugettext_lazy as _
+from mptt.admin import DraggableMPTTAdmin
 from reversion.admin import VersionAdmin
 
 from judge.dblock import LockModel
@@ -11,8 +11,8 @@ from judge.models import NavigationBar
 from judge.widgets import HeavySelect2MultipleWidget, HeavyPreviewAdminPageDownWidget, HeavySelect2Widget
 
 
-class NavigationBarAdmin(MPTTModelAdmin):
-    list_display = ('label', 'key', 'path')
+class NavigationBarAdmin(DraggableMPTTAdmin):
+    list_display = DraggableMPTTAdmin.list_display + ('key', 'linked_path')
     fields = ('key', 'label', 'path', 'order', 'regex', 'parent')
     list_editable = ()  # Bug in SortableModelAdmin: 500 without list_editable being set
     mptt_level_indent = 20
@@ -21,6 +21,10 @@ class NavigationBarAdmin(MPTTModelAdmin):
     def __init__(self, *args, **kwargs):
         super(NavigationBarAdmin, self).__init__(*args, **kwargs)
         self.__save_model_calls = 0
+
+    def linked_path(self, obj):
+        return format_html(u'<a href="{0}" target="_blank">{0}</a>', obj.path)
+    linked_path.short_description = _('link path')
 
     def save_model(self, request, obj, form, change):
         self.__save_model_calls += 1
@@ -81,26 +85,6 @@ class SolutionForm(ModelForm):
 
         if HeavyPreviewAdminPageDownWidget is not None:
             widgets['content'] = HeavyPreviewAdminPageDownWidget(preview=reverse_lazy('solution_preview'))
-
-
-class SolutionAdmin(VersionAdmin):
-    fields = ('url', 'title', 'is_public', 'publish_on', 'problem', 'authors', 'content')
-    list_display = ('title', 'url', 'problem_link', 'show_public')
-    search_fields = ('url', 'title')
-    form = SolutionForm
-
-    def show_public(self, obj):
-        return format_html(u'<a href="{0}" style="white-space:nowrap;">{1}</a>',
-                           obj.get_absolute_url(), ugettext('View on site'))
-    show_public.short_description = ''
-
-    def problem_link(self, obj):
-        if obj.problem is None:
-            return 'N/A'
-        return format_html(u'<a href="{}">{}</a>', reverse('admin:judge_problem_change', args=[obj.problem_id]),
-                           obj.problem.name)
-    problem_link.short_description = ''
-    problem_link.admin_order_field = 'problem__name'
 
 
 class LicenseForm(ModelForm):

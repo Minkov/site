@@ -1,5 +1,6 @@
 import logging
 import re
+from HTMLParser import HTMLParser
 from parser import ParserError
 from urlparse import urlparse
 
@@ -43,6 +44,7 @@ class AwesomeRenderer(MathRenderer, mistune.Renderer):
     def __init__(self, *args, **kwargs):
         self.nofollow = kwargs.pop('nofollow', True)
         self.texoid = TexoidRenderer() if kwargs.pop('texoid', False) else None
+        self.parser = HTMLParser()
         super(AwesomeRenderer, self).__init__(*args, **kwargs)
 
     def _link_rel(self, href):
@@ -63,7 +65,7 @@ class AwesomeRenderer(MathRenderer, mistune.Renderer):
         return '<a href="%s"%s>%s</a>' % (link, self._link_rel(link), text)
 
     def link(self, link, title, text):
-        link = mistune.escape_link(link, quote=True)
+        link = mistune.escape_link(link)
         if not title:
             return '<a href="%s"%s>%s</a>' % (link, self._link_rel(link), text)
         title = mistune.escape(title, quote=True)
@@ -78,9 +80,10 @@ class AwesomeRenderer(MathRenderer, mistune.Renderer):
         if self.texoid and html.startswith('<latex'):
             attr = html[6:html.index('>')]
             latex = html[html.index('>')+1:html.rindex('<')]
+            latex = self.parser.unescape(latex)
             result = self.texoid.get_result(latex)
             if not result:
-                return '<pre>%s</pre>' % mistune.escape(latex)
+                return '<pre>%s</pre>' % mistune.escape(latex, smart_amp=False)
             elif 'error' not in result:
                 img = ('''<img src="%(svg)s" onerror="this.src='%(png)s';this.onerror=null"'''
                           'width="%(width)s" height="%(height)s"%(tail)s>') % {
@@ -99,7 +102,7 @@ class AwesomeRenderer(MathRenderer, mistune.Renderer):
                     style += ['text-align: center']
                 return '<%s style="%s">%s</%s>' % (tag, ';'.join(style), img, tag)
             else:
-                return '<pre>%s</pre>' % mistune.escape(result['error'])
+                return '<pre>%s</pre>' % mistune.escape(result['error'], smart_amp=False)
         return super(AwesomeRenderer, self).block_html(html)
 
     def header(self, text, level, *args, **kwargs):

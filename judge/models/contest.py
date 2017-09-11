@@ -182,16 +182,20 @@ class ContestParticipation(models.Model):
         return contest.end_time if contest.time_limit is None else \
             min(self.real_start + contest.time_limit, contest.end_time)
 
+    @cached_property
+    def _now(self):
+        # This ensures that all methods talk about the same now.
+        return timezone.now()
+
     @property
     def ended(self):
-        return self.end_time is not None and self.end_time < timezone.now()
+        return self.end_time is not None and self.end_time < self._now
 
     @property
     def time_remaining(self):
-        now = timezone.now()
         end = self.end_time
-        if end is not None and end >= now:
-            return end - now
+        if end is not None and end >= self._now:
+            return end - self._now
 
     def update_cumtime(self):
         cumtime = 0
@@ -201,7 +205,7 @@ class ContestParticipation(models.Model):
             if not solution:
                 continue
             dt = solution[0]['time'] - self.start
-            cumtime += dt.days * 86400 + dt.seconds
+            cumtime += dt.total_seconds()
         self.cumtime = cumtime
         self.save()
 
@@ -229,8 +233,10 @@ class ContestProblem(models.Model):
     is_pretested = models.BooleanField(default=False, verbose_name=_('is pretested'))
     order = models.PositiveIntegerField(db_index=True, verbose_name=_('order'))
     output_prefix_override = models.IntegerField(verbose_name=_('output prefix length override'), null=True, blank=True)
-    max_submissions = models.IntegerField(help_text=_('Maximum number of submissions for this problem, or 0 for no limit.'),
-                                          default=0, validators=[MinValueValidator(0, _('Why include a problem you can\'t submit to?'))])
+    max_submissions = models.IntegerField(help_text=_('Maximum number of submissions for this problem, '
+                                                      'or 0 for no limit.'), default=0,
+                                          validators=[MinValueValidator(0, _('Why include a problem you '
+                                                                             'can\'t submit to?'))])
 
     class Meta:
         unique_together = ('problem', 'contest')

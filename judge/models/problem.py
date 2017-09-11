@@ -106,8 +106,8 @@ class Problem(models.Model):
                                          'These users will be able to view a private problem, but not edit it.'))
     types = models.ManyToManyField(ProblemType, verbose_name=_('problem types'))
     group = models.ForeignKey(ProblemGroup, verbose_name=_('problem group'))
-    time_limit = models.FloatField(verbose_name=_('time limit'))
-    memory_limit = models.IntegerField(verbose_name=_('memory limit'))
+    time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_('The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'))
+    memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'))
     short_circuit = models.BooleanField(default=False)
     points = models.FloatField(verbose_name=_('points'))
     partial = models.BooleanField(verbose_name=_('allows partial points'), default=False)
@@ -166,12 +166,19 @@ class Problem(models.Model):
         if user.has_perm('judge.edit_own_problem') and self.is_editor(user.profile):
             return True
 
-        # If the user is in a contest containing that problem or is a tester
-        if user.is_authenticated:
-            return (self.testers.filter(id=user.profile.id).exists() or
-                    Problem.objects.filter(id=self.id, contest__users__user=user.profile).exists())
-        else:
+        if not user.is_authenticated:
             return False
+
+        # If user is a tester
+        if self.testers.filter(id=user.profile.id).exists():
+            return True
+
+        # If user is currently in a contest containing that problem
+        current = user.profile.current_contest_id
+        if current is None:
+            return False
+        from judge.models import ContestProblem
+        return ContestProblem.objects.filter(problem_id=self.id, contest__users__id=current).exists()
 
     def __unicode__(self):
         return self.name
@@ -325,3 +332,29 @@ class LanguageLimit(models.Model):
         unique_together = ('problem', 'language')
         verbose_name = _('language-specific resource limit')
         verbose_name_plural = _('language-specific resource limits')
+
+
+class Solution(models.Model):
+    problem = models.OneToOneField(Problem, on_delete=models.SET_NULL, verbose_name=_('associated problem'),
+                                   null=True, blank=True, related_name='solution')
+    is_public = models.BooleanField(verbose_name=_('public visibility'), default=False)
+    publish_on = models.DateTimeField(verbose_name=_('publish date'))
+    authors = models.ManyToManyField(Profile, verbose_name=_('authors'), blank=True)
+    content = models.TextField(verbose_name=_('editorial content'))
+
+    def get_absolute_url(self):
+        problem = self.problem
+        if problem is None:
+            return reverse('home')
+        else:
+            return reverse('problem_editorial', args=[problem.code])
+
+    def __unicode__(self):
+        return _('Editorial for %s') % self.problem.name
+
+    class Meta:
+        permissions = (
+            ('see_private_solution', 'See hidden solutions'),
+        )
+        verbose_name = _('solution')
+        verbose_name_plural = _('solutions')

@@ -13,7 +13,7 @@ from mptt.models import MPTTModel
 from reversion.models import Version
 
 from judge.models.contest import Contest
-from judge.models.interface import BlogPost, Solution
+from judge.models.interface import BlogPost
 from judge.models.problem import Problem
 from judge.models.profile import Profile
 
@@ -40,7 +40,7 @@ class Comment(MPTTModel):
                                                        _('Page code must be ^[pc]:[a-z0-9]+$|^b:\d+$'))])
     score = models.IntegerField(verbose_name=_('votes'), default=0)
     title = models.CharField(max_length=200, verbose_name=_('title of comment'), blank=True)
-    body = models.TextField(verbose_name=_('body of comment'))
+    body = models.TextField(verbose_name=_('body of comment'), max_length=8192)
     hidden = models.BooleanField(verbose_name=_('hide the comment'), default=0)
     parent = TreeForeignKey('self', verbose_name=_('parent'), null=True, blank=True, related_name='replies')
     versions = VersionRelation()
@@ -106,13 +106,13 @@ class Comment(MPTTModel):
     def page_title(self):
         try:
             if self.page.startswith('p:'):
-                return Problem.objects.get(code=self.page[2:]).name
+                return Problem.objects.values_list('name', flat=True).get(code=self.page[2:])
             elif self.page.startswith('c:'):
-                return Contest.objects.get(key=self.page[2:]).name
+                return Contest.objects.values_list('name', flat=True).get(key=self.page[2:])
             elif self.page.startswith('b:'):
-                return BlogPost.objects.get(id=self.page[2:]).title
+                return BlogPost.objects.values_list('title', flat=True).get(id=self.page[2:])
             elif self.page.startswith('s:'):
-                return Solution.objects.get(problem__code=self.page[2:]).title
+                return _('Editorial for %s') % Problem.objects.values_list('name', flat=True).get(code=self.page[2:])
             return '<unknown>'
         except ObjectDoesNotExist:
             return '<deleted>'
@@ -121,7 +121,7 @@ class Comment(MPTTModel):
         return '%s#comment-%d' % (self.link, self.id)
 
     def __unicode__(self):
-        return self.title
+        return '%(page)s by %(user)s' % {'page': self.page, 'user': self.author.user.username}
 
         # Only use this when queried with
         # .prefetch_related(Prefetch('votes', queryset=CommentVote.objects.filter(voter_id=profile_id)))
