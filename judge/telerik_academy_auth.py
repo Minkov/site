@@ -34,8 +34,6 @@ class RemoteUserBackend (object):
                 profile.name = username
                 profile.save()
 
-            import pdb; pdb.set_trace()
-
             if result['IsAdmin']:
                 user.is_staff = True
                 user.is_superuser = True
