@@ -19,10 +19,12 @@ class RemoteUserBackend (object):
         result = json.loads(r.content)
 
         if result['IsValid']:
+            real_username = result['UserName']
+
             try:
-                user = User.objects.get(username=username)
+                user = User.objects.get(username=real_username)
             except User.DoesNotExist:
-                user = User(username=username)
+                user = User(username=real_username)
 
                 user.save()
 
@@ -31,7 +33,7 @@ class RemoteUserBackend (object):
                     'timezone': 'Europe/Sofia',
                 })
 
-                profile.name = username
+                profile.name = real_username
                 profile.save()
 
             if result['IsAdmin']:
