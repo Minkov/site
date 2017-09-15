@@ -386,6 +386,8 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
         context['search_query'] = self.search_query
         context['completed_problem_ids'] = self.get_completed_problems()
         context['attempted_problems'] = self.get_attempted_problems()
+        context['types'] = ProblemType.objects.all().values_list('id', 'full_name')
+        # context['groups'] = ProblemGroup.objects.all()
 
         context.update(self.get_sort_paginate_context())
         if not self.in_contest:
@@ -415,10 +417,12 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
             self.all_sorts.discard('type')
 
         if 'category' in request.GET:
+            print(request.GET)
             try:
                 self.category = int(request.GET.get('category'))
             except ValueError:
                 pass
+        self.selected_types = []
         if 'type' in request.GET:
             try:
                 self.selected_types = map(int, request.GET.getlist('type'))
@@ -429,6 +433,7 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
         self.setup(request)
 
         try:
+            self.request.selected_types = ['asd', 2]
             return super(ProblemList, self).get(request, *args, **kwargs)
         except ProgrammingError as e:
             return generic_message(request, 'FTS syntax error', e.args[1], status=400)
