@@ -174,10 +174,31 @@ block js_media
                 .css({'visibility': 'visible'});
             //            $('#language').select2({multiple: 1, placeholder: '{% trans "Filter by language..." %}'})
             //                .css({'visibility': 'visible'});
-            $('#category').select2({multiple:0, placeholder: '{% trans "Filter by category..." %}'})
+            $('#category').select2({multiple: 0, placeholder: '{% trans "Filter by category..." %}'})
                 .css({'visibility': 'visible'});
-            $(".select2").css({"width": "200px"});
 
+            $('.select2, input[type=text]').css({
+                display: "block",
+                width: "100%",
+            })
+        });
+    script(type='text/javascript').
+        $(function () {
+            var info_float = $('.info-float');
+            var container = $('#content-right');
+            if (window.bad_browser) {
+                container.css('float', 'right');
+            } else if (!featureTest('position', 'sticky')) {
+                fix_div(info_float, 55);
+                $(window).resize(function () {
+                    info_float.width(container.width());
+                });
+                info_float.width(container.width());
+            }
+
+            window.update_relative_time = register_update_relative(function () {
+                return $('#submissions-table').find('span.time');
+            });
         });
 
 block title_ruler
@@ -188,63 +209,46 @@ block title_row
     include problem/problem-list-tabs
 
 block body
-    h4 {% trans "Search problems" %}
-    form#filter-form(name='form', action='/problems', method='get')
-        //div.filter-form-group
-        if search_query
-            input(type="text", name="search", placeholder="Enter problem name", style="margin-bottom: .1em", value=search_query)
-        else
-            input.select2-selection__rendered(type="text", name="search", placeholder="Enter problem name", style="margin-bottom: .1em")
-        //div.filter-form-group
-        //label: i {% trans "Category" %}
-        select#category(name='category', multiple)
-            option
-            if category
-                each id, full_name in categories
-                    if category == id
-                        option(value=id, selected)
-                            =full_name
-                    else
-                        option(value=id)
-                            =full_name
-            else
-                each id, full_name in categories
-                    option(value=id)
-                            =full_name
-        select#type(name='type', multiple)
-            option
-            each id, full_name in types
-                if id in selected_types
-                    option(value=id, selected)
-                        =full_name
-                else
-                    option(value=id)
-                        =full_name
-        
-        //label: i {% trans "Group" %}
-        //    select(name='group')
-        //        each name, id in groups
-        //            option(value=id)
-        //                =name
-        //.form-submit-group
-        //button#go.button {% trans "Go" %}
-        a.button(onclick='form.submit()', style="") {% trans "Go" %}
-        //a#go.(onclick='form.submit()') {% trans "Go" %}
-
     #common-content
-
-        block before_table
-        if not IN_CONTEST and hot_problems
-            #content-right.problems: .info-float
-                include problem/search-form
+        #content-right.problems
+            .info-float.content-description
                 .sidebox
-                    h3 {% trans "Hot problems" %} #[i.fa.fa-fire]
-                    .sidebox-content
-                        ul.problem-list: for problem in hot_problems
-                            li
-                                a.hot-problem-link(href='{% url "problem_detail" problem.code %}')= problem.name
-                                span.hot-problem-count= problem.count
+                    h3 {% trans "Search problems" %}
+                    div.sidebox-content
+                        form#filter-form(name='form', action='/problems', method='get')
+                            div.filter-form-group
+                                if search_query
+                                    input(type="text", name="search", placeholder="Enter problem name", style="margin-bottom: .1em", value=search_query)
+                                else
+                                    input(type="text", name="search", placeholder="Enter problem name", style="margin-bottom: .1em")
+                            div.filter-form-group
+                                select#category(name='category')
+                                    option
+                                    if category
+                                        each id, full_name in categories
+                                            if category == id
+                                                option(value=id, selected)
+                                                    =full_name
+                                            else
+                                                option(value=id)
+                                                    =full_name
+                                    else
+                                        each id, full_name in categories
+                                            option(value=id)
+                                                =full_name
+                            div.filter-form-group
+                                select#type(name='type', multiple)
+                                    option
+                                    each id, full_name in types
+                                        if id in selected_types
+                                            option(value=id, selected)
+                                                =full_name
+                                        else
+                                            option(value=id)
+                                                =full_name
 
+                            div.form-submit-group
+                                a#go.button(onclick='form.submit()') {% trans "Go" %}
 
         #content-left.problems
             if page_obj.num_pages > 1
