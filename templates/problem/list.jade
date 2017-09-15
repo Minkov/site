@@ -170,11 +170,14 @@ block js_media
         });
     script.
         $(function () {
-            $('#type').select2({multiple: 0, placeholder: '{% trans "Filter by category..." %}'})
+            $('#type').select2({multiple: 1, placeholder: '{% trans "Filter by type ..." %}'})
                 .css({'visibility': 'visible'});
             //            $('#language').select2({multiple: 1, placeholder: '{% trans "Filter by language..." %}'})
             //                .css({'visibility': 'visible'});
+            $('#category').select2({multiple:0, placeholder: '{% trans "Filter by category..." %}'})
+                .css({'visibility': 'visible'});
             $(".select2").css({"width": "200px"});
+
         });
 
 block title_ruler
@@ -194,10 +197,10 @@ block body
             input.select2-selection__rendered(type="text", name="search", placeholder="Enter problem name", style="margin-bottom: .1em")
         //div.filter-form-group
         //label: i {% trans "Category" %}
-        select#type(name='category', multiple)
+        select#category(name='category', multiple)
             option
             if category
-                each id, full_name in types
+                each id, full_name in categories
                     if category == id
                         option(value=id, selected)
                             =full_name
@@ -205,9 +208,19 @@ block body
                         option(value=id)
                             =full_name
             else
-                each id, full_name in types
+                each id, full_name in categories
                     option(value=id)
                             =full_name
+        select#type(name='type', multiple)
+            option
+            each id, full_name in types
+                if id in selected_types
+                    option(value=id, selected)
+                        =full_name
+                else
+                    option(value=id)
+                        =full_name
+        
         //label: i {% trans "Group" %}
         //    select(name='group')
         //        each name, id in groups
