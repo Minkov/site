@@ -329,6 +329,7 @@ CACHES = {}
 # Authentication
 AUTHENTICATION_BACKENDS = (
     'judge.telerik_academy_auth.RemoteUserBackend',
+    'django.contrib.auth.backends.ModelBackend'
 )
 
 SOCIAL_AUTH_PIPELINE = (
