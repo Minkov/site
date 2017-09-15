@@ -6,6 +6,7 @@ from django.contrib.sitemaps.views import sitemap
 from django.core.urlresolvers import reverse
 from django.http import HttpResponsePermanentRedirect
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic.base import RedirectView
 from social.apps.django_app.urls import urlpatterns as social_auth_patterns
 
 from judge.feed import CommentFeed, AtomCommentFeed, BlogFeed, AtomBlogFeed, ProblemFeed, AtomProblemFeed
@@ -35,7 +36,7 @@ register_patterns = [
         ActivationView.as_view(title='Activation key invalid'),
         name='registration_activate'),
     url(r'^register/$',
-        RegistrationView.as_view(title='Register'),
+        RedirectView.as_view(url="https://telerikacademy.com/Users/Auth/Registration", permanent=False),
         name='registration_register'),
     url(r'^register/complete/$',
         TitledTemplateView.as_view(template_name='registration/registration_complete.jade',
