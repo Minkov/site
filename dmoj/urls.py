@@ -24,28 +24,28 @@ from judge.views.select2 import UserSelect2View, OrganizationSelect2View, Proble
 admin.autodiscover()
 
 register_patterns = [
-    url(r'^activate/complete/$',
-        TitledTemplateView.as_view(template_name='registration/activation_complete.jade',
-                                   title='Activation Successful!'),
-        name='registration_activation_complete'),
-    # Activation keys get matched by \w+ instead of the more specific
-    # [a-fA-F0-9]{40} because a bad activation key should still get to the view;
-    # that way it can return a sensible "invalid key" message instead of a
-    # confusing 404.
-    url(r'^activate/(?P<activation_key>\w+)/$',
-        ActivationView.as_view(title='Activation key invalid'),
-        name='registration_activate'),
+#   url(r'^activate/complete/$',
+#       TitledTemplateView.as_view(template_name='registration/activation_complete.jade',
+#                                  title='Activation Successful!'),
+#       name='registration_activation_complete'),
+#   # Activation keys get matched by \w+ instead of the more specific
+#   # [a-fA-F0-9]{40} because a bad activation key should still get to the view;
+#   # that way it can return a sensible "invalid key" message instead of a
+#   # confusing 404.
+#   url(r'^activate/(?P<activation_key>\w+)/$',
+#       ActivationView.as_view(title='Activation key invalid'),
+#       name='registration_activate'),
     url(r'^register/$',
         RedirectView.as_view(url="https://telerikacademy.com/Users/Auth/Registration", permanent=False),
         name='registration_register'),
-    url(r'^register/complete/$',
-        TitledTemplateView.as_view(template_name='registration/registration_complete.jade',
-                                   title='Registration Completed'),
-        name='registration_complete'),
-    url(r'^register/closed/$',
-        TitledTemplateView.as_view(template_name='registration/registration_closed.html',
-                                   title='Registration not allowed'),
-        name='registration_disallowed'),
+#   url(r'^register/complete/$',
+#       TitledTemplateView.as_view(template_name='registration/registration_complete.jade',
+#                                  title='Registration Completed'),
+#       name='registration_complete'),
+#   url(r'^register/closed/$',
+#       TitledTemplateView.as_view(template_name='registration/registration_closed.html',
+#                                  title='Registration not allowed'),
+#       name='registration_disallowed'),
     url(r'^login/$', auth_views.login,
         {'template_name': 'registration/login.jade', 'extra_context': {'title': 'Login'},
          'authentication_form': CustomAuthenticationForm},
@@ -84,7 +84,7 @@ register_patterns = [
         {'template_name': 'registration/password_reset_done.jade',
          'extra_context': {'title': 'Password Reset Successful'}},
         name='password_reset_done'),
-    url(r'^social/error/$', register.social_auth_error, name='social_auth_error'),
+#   url(r'^social/error/$', register.social_auth_error, name='social_auth_error'),
 ]
 
 
