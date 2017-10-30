@@ -11,6 +11,8 @@
 # You may use <http://www.miniwebtool.com/django-secret-key-generator/>
 # to generate this key.
 import socket
+import os
+
 HOSTNAME = socket.gethostname()
 SECRET_KEY = 'Purple Unicorn'
 
@@ -55,14 +57,11 @@ CACHES = {
 DATABASES = {
      'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dmoj',
-        'USER': 'vagrant',
-        'PASSWORD': 'vagrant',
-        'HOST': '127.0.0.1',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'sql_mode': 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',
-        },
+        'NAME': 'docker',
+        'USER': 'docker',
+        'PASSWORD': 'docker',
+        'HOST': 'db',
+        'PORT': '3306',
     }
 }
 
@@ -140,7 +139,7 @@ SERVER_EMAIL = 'Telerik Academy Judge <judge@telerikacademy.com>'
 # webserver to serve the static files. This is the directory where all the 
 # static files DMOJ uses will be collected to.
 # You must configure your webserver to serve this directory as /static/ in production.
-STATIC_ROOT = '/tmp/static'
+STATIC_ROOT = '/usr/src/app/static'
 
 # URL to access static files.
 STATIC_URL = '/static/'
@@ -269,7 +268,7 @@ LOGGING = {
         'bridge': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/vagrant/bridge.log',
+            'filename': '/tmp/bridge.log',
             'maxBytes': 10 * 1024 * 1024,
             'backupCount': 10,
             'formatter': 'file',

@@ -1,0 +1,16 @@
+db:
+  image: mariadb
+  environment:
+    MYSQL_ROOT_PASSWORD: docker
+    MYSQL_DATABASE: docker
+    MYSQL_USER: docker
+    MYSQL_PASSWORD: docker
+web:
+  build: .
+  links:
+    - db
+  ports:
+    - "8000:8000"
+  volumes:
+    - .:/usr/src/app
+  command: "/usr/src/env/bin/python manage.py runserver 0.0.0.0:8000"

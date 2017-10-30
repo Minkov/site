@@ -1,0 +1,43 @@
+db:
+  image: mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: docker
+    MYSQL_DATABASE: docker
+    MYSQL_USER: docker
+    MYSQL_PASSWORD: docker
+migrate:
+  build: .
+  links:
+   - db
+  volumes:
+   - .:/usr/src/app
+  command: bash -c "sleep 3 && /usr/src/env/bin/python manage.py migrate"
+collectstatic:
+  build: .
+  links:
+    - migrate
+  volumes:
+    - .:/usr/src/app
+  command: bash -c "sleep 5 && /usr/src/app/make_style.sh && /usr/src/env/bin/python manage.py collectstatic --noinput"
+loaddata:
+  build: .
+  links:
+   - db
+   - collectstatic
+  volumes:
+   - .:/usr/src/app
+  command: bash -c "sleep 7 && /usr/src/env/bin/python manage.py loaddata docker-fixture.json && /usr/src/env/bin/python manage.py compilemessages && /usr/src/env/bin/python manage.py compilejsi18n && /usr/src/env/bin/python manage.py loaddata navbar &&/usr/src/env/bin/python manage.py loaddata language_small"
+
+web:
+  build: .
+  links:
+   - db
+   - migrate
+   - collectstatic
+   - loaddata
+  ports:
+   - "8000:8000"
+  volumes:
+   - .:/usr/src/app
+  command: bash -c "sleep 10 && /usr/src/env/bin/python manage.py runserver 0.0.0.0:8000"
+
