@@ -2,6 +2,7 @@ import errno
 import os
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import ValidationError
@@ -52,7 +53,8 @@ def profile_update(sender, instance, **kwargs):
     if hasattr(instance, '_updating_stats_only'):
         return
 
-    cache.delete_many([make_template_fragment_key('user_about', (instance.id,))] +
+    cache.delete_many([make_template_fragment_key('user_about', (instance.id, engine))
+                       for engine in EFFECTIVE_MATH_ENGINES] +
                       [make_template_fragment_key('org_member_count', (org_id,))
                        for org_id in instance.organizations.values_list('id', flat=True)])
 
@@ -123,4 +125,6 @@ _misc_config_i18n.append('')
 
 @receiver(post_save, sender=MiscConfig)
 def misc_config_update(sender, instance, **kwargs):
-    cache.delete_many(['misc_config:%s:%s' % (lang, instance.key.split('.')[0]) for lang in _misc_config_i18n])
+    cache.delete_many(['misc_config:%s:%s:%s' % (domain, lang, instance.key.split('.')[0])
+                       for lang in _misc_config_i18n
+                       for domain in Site.objects.values_list('domain', flat=True)])

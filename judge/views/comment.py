@@ -1,10 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.forms.models import ModelForm
-from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, Http404
+from django.http import HttpResponseForbidden, HttpResponseBadRequest, HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+from django.views.decorators.http import require_POST
 from django.views.generic import DetailView, UpdateView
 from reversion import revisions
 from reversion.models import Version
@@ -77,7 +80,7 @@ class CommentMixin(object):
 
 
 class CommentRevisionAjax(CommentMixin, DetailView):
-    template_name = 'comments/revision-ajax.jade'
+    template_name = 'comments/revision-ajax.html'
 
     def get_context_data(self, **kwargs):
         context = super(CommentRevisionAjax, self).get_context_data(**kwargs)
@@ -105,7 +108,7 @@ class CommentEditForm(ModelForm):
 
 
 class CommentEditAjax(LoginRequiredMixin, CommentMixin, UpdateView):
-    template_name = 'comments/edit-ajax.jade'
+    template_name = 'comments/edit-ajax.html'
     form_class = CommentEditForm
 
     def form_valid(self, form):
@@ -128,18 +131,18 @@ class CommentEditAjax(LoginRequiredMixin, CommentMixin, UpdateView):
 
 
 class CommentEdit(TitleMixin, CommentEditAjax):
-    template_name = 'comments/edit.jade'
+    template_name = 'comments/edit.html'
 
     def get_title(self):
-        return _('Editing %s') % self.object.title
+        return _('Editing comment')
 
 
 class CommentContent(CommentMixin, DetailView):
-    template_name = 'comments/content.jade'
+    template_name = 'comments/content.html'
 
 
 class CommentVotesAjax(PermissionRequiredMixin, CommentMixin, DetailView):
-    template_name = 'comments/votes.jade'
+    template_name = 'comments/votes.html'
     permission_required = 'judge.change_commentvote'
 
     def get_context_data(self, **kwargs):
@@ -147,3 +150,18 @@ class CommentVotesAjax(PermissionRequiredMixin, CommentMixin, DetailView):
         context['votes'] = (self.object.votes.select_related('voter__user')
                             .only('id', 'voter__display_rank', 'voter__user__username', 'score'))
         return context
+
+
+@require_POST
+def comment_hide(request):
+    if not request.user.has_perm('judge.change_comment'):
+        raise PermissionDenied()
+    try:
+        comment_id = int(request.POST['id'])
+    except ValueError:
+        return HttpResponseBadRequest()
+
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.hidden = True
+    comment.save(update_fields=['hidden'])
+    return HttpResponse('ok')

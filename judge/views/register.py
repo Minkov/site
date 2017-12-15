@@ -14,6 +14,7 @@ from registration.forms import RegistrationForm
 from sortedm2m.forms import SortedMultipleChoiceField
 
 from judge.models import Profile, Language, Organization, TIMEZONE
+from judge.utils.recaptcha import ReCaptchaWidget, ReCaptchaField
 from judge.utils.subscription import Subscription, newsletter_id
 from judge.widgets import Select2Widget, Select2MultipleWidget
 
@@ -37,6 +38,9 @@ class CustomRegistrationForm(RegistrationForm):
     if newsletter_id is not None:
         newsletter = forms.BooleanField(label=_('Subscribe to newsletter?'), initial=True, required=False)
 
+    if ReCaptchaField is not None:
+        captcha = ReCaptchaField(widget=ReCaptchaWidget())
+
     def clean_email(self):
         if User.objects.filter(email=self.cleaned_data['email']).exists():
             raise forms.ValidationError(ugettext(u'The email address "%s" is already taken. Only one registration '
@@ -53,7 +57,7 @@ class CustomRegistrationForm(RegistrationForm):
 class RegistrationView(OldRegistrationView):
     title = _('Registration')
     form_class = CustomRegistrationForm
-    template_name = 'registration/registration_form.jade'
+    template_name = 'registration/registration_form.html'
 
     def get_context_data(self, **kwargs):
         if 'title' not in kwargs:
@@ -91,7 +95,7 @@ class RegistrationView(OldRegistrationView):
 
 class ActivationView(OldActivationView):
     title = _('Registration')
-    template_name = 'registration/activate.jade'
+    template_name = 'registration/activate.html'
 
     def get_context_data(self, **kwargs):
         if 'title' not in kwargs:
@@ -100,7 +104,7 @@ class ActivationView(OldActivationView):
 
 
 def social_auth_error(request):
-    return render(request, 'generic-message.jade', {
+    return render(request, 'generic-message.html', {
         'title': ugettext('Authentication failure'),
         'message': request.GET.get('message')
     })

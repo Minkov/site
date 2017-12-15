@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ImproperlyConfigured
 from django.core.urlresolvers import reverse
@@ -23,7 +25,7 @@ from judge.utils.views import TitleMixin, DiggPaginatorMixin
 def submission_related(queryset):
     return queryset.select_related('user__user', 'problem', 'language') \
         .only('id', 'user__user__username', 'user__name', 'user__display_rank', 'user__rating', 'problem__name',
-              'problem__code', 'language__short_name', 'language__key', 'date', 'time', 'memory',
+              'problem__code', 'problem__is_public', 'language__short_name', 'language__key', 'date', 'time', 'memory',
               'points', 'result', 'status', 'case_points', 'case_total', 'current_testcase')
 
 
@@ -69,7 +71,7 @@ class SubmissionDetailBase(LoginRequiredMixin, TitleMixin, SubmissionMixin, Deta
 
 
 class SubmissionSource(SubmissionDetailBase):
-    template_name = 'submission/source.jade'
+    template_name = 'submission/source.html'
 
     def get_context_data(self, **kwargs):
         context = super(SubmissionSource, self).get_context_data(**kwargs)
@@ -79,14 +81,37 @@ class SubmissionSource(SubmissionDetailBase):
         return context
 
 
+def make_batch(batch, cases):
+    result = {'id': batch, 'cases': cases}
+    if batch:
+        result['points'] = min(map(attrgetter('points'), cases))
+        result['total'] = max(map(attrgetter('total'), cases))
+    return result
+
+
+def group_test_cases(cases):
+    result = []
+    buf = []
+    last = None
+    for case in cases:
+        if case.batch != last and buf:
+            result.append(make_batch(last, buf))
+            buf = []
+        buf.append(case)
+        last = case.batch
+    if buf:
+        result.append(make_batch(last, buf))
+    return result
+
+
 class SubmissionStatus(SubmissionDetailBase):
-    template_name = 'submission/status.jade'
+    template_name = 'submission/status.html'
 
     def get_context_data(self, **kwargs):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
         context['last_msg'] = event.last()
-        context['test_cases'] = submission.test_cases.all()
+        context['batches'] = group_test_cases(submission.test_cases.all())
         context['time_limit'] = submission.problem.time_limit
         try:
             lang_limit = submission.problem.language_limits.get(language=submission.language)
@@ -98,7 +123,7 @@ class SubmissionStatus(SubmissionDetailBase):
 
 
 class SubmissionTestCaseQuery(SubmissionStatus):
-    template_name = 'submission/status-testcases.jade'
+    template_name = 'submission/status-testcases.html'
 
     def get(self, request, *args, **kwargs):
         if 'id' not in request.GET or not request.GET['id'].isdigit():
@@ -130,7 +155,7 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
     title = ugettext_lazy('All submissions')
     content_title = ugettext_lazy('All submissions')
     tab = 'all_submissions_list'
-    template_name = 'submission/list.jade'
+    template_name = 'submission/list.html'
     context_object_name = 'submissions'
     first_page_href = None
 
@@ -161,6 +186,12 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         else:
             queryset = queryset.select_related('contest__participation__contest') \
                 .defer('contest__participation__contest__description')
+
+        if self.selected_languages:
+            queryset = queryset.filter(language_id__in=Language.objects.filter(key__in=self.selected_languages))
+        if self.selected_statuses:
+            queryset = queryset.filter(result__in=self.selected_statuses)
+
         return queryset
 
     def get_queryset(self):
@@ -175,6 +206,12 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
     def get_all_submissions_page(self):
         return reverse('all_submissions')
 
+    def get_searchable_status_codes(self):
+        hidden_codes = ['SC']
+        if not self.request.user.is_superuser and not self.request.user.is_staff:
+            hidden_codes += ['IE']
+        return [(key, value) for key, value in Submission.RESULT if key not in hidden_codes]
+
     def get_context_data(self, **kwargs):
         context = super(SubmissionsListBase, self).get_context_data(**kwargs)
         authenticated = self.request.user.is_authenticated
@@ -183,8 +220,17 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         context['completed_problem_ids'] = user_completed_ids(self.request.user.profile) if authenticated else []
         context['authored_problem_ids'] = user_authored_ids(self.request.user.profile) if authenticated else []
         context['editable_problem_ids'] = user_editable_ids(self.request.user.profile) if authenticated else []
+
+        context['all_languages'] = Language.objects.all().values_list('key', 'name')
+        context['selected_languages'] = self.selected_languages
+
+        context['all_statuses'] = self.get_searchable_status_codes()
+        context['selected_statuses'] = self.selected_statuses
+
         context['results'] = self.get_result_table()
-        context['first_page_href'] = self.first_page_href or '.'
+
+        context['page_suffix'] = suffix = ('?' + self.request.GET.urlencode()) if self.request.GET else ''
+        context['first_page_href'] = (self.first_page_href or '.') + suffix
         context['my_submissions_link'] = self.get_my_submissions_page()
         context['all_submissions_link'] = self.get_all_submissions_page()
         context['tab'] = self.tab
@@ -194,8 +240,13 @@ class SubmissionsListBase(DiggPaginatorMixin, TitleMixin, ListView):
         check = self.access_check(request)
         if check is not None:
             return check
+
+        self.selected_languages = set(request.GET.getlist('language'))
+        self.selected_statuses = set(request.GET.getlist('status'))
+
         if 'results' in request.GET:
-            return render(request, 'problem/statistics-table.jade', {'results': self.get_result_table()})
+            return render(request, 'problem/statistics-table.html', {'results': self.get_result_table()})
+
         return super(SubmissionsListBase, self).get(request, *args, **kwargs)
 
 
@@ -253,7 +304,7 @@ class ProblemSubmissionsBase(SubmissionsListBase):
     def get_queryset(self):
         if self.in_contest and not self.contest.contest_problems.filter(problem_id=self.problem.id).exists():
             raise Http404()
-        return super(ProblemSubmissionsBase, self)._get_queryset().filter(problem__code=self.problem.code)
+        return super(ProblemSubmissionsBase, self)._get_queryset().filter(problem_id=self.problem.id)
 
     def get_title(self):
         return _('All submissions for %s') % self.problem_name
@@ -329,7 +380,7 @@ class UserProblemSubmissions(ConditionalUserTabMixin, UserMixin, ProblemSubmissi
 def single_submission(request, submission_id, show_problem=True):
     authenticated = request.user.is_authenticated
     submission = get_object_or_404(submission_related(Submission.objects.all()), id=int(submission_id))
-    return render(request, 'submission/row.jade', {
+    return render(request, 'submission/row.html', {
         'submission': submission,
         'authored_problem_ids': user_authored_ids(request.user.profile) if authenticated else [],
         'completed_problem_ids': user_completed_ids(request.user.profile) if authenticated else [],
@@ -355,38 +406,11 @@ class AllSubmissions(SubmissionsListBase):
         if self.request.user.is_authenticated:
             return reverse('all_user_submissions', kwargs={'user': self.request.user.username})
 
-    def get_queryset(self):
-        qs = super(AllSubmissions, self).get_queryset()
-        if self.selected_languages:
-            qs = qs.filter(language__key__in=self.selected_languages)
-        if self.selected_statuses:
-            qs = qs.filter(result__in=self.selected_statuses)
-        return qs
-
-    def get_searchable_status_codes(self):
-        hidden_codes = ['SC']
-        if not self.request.user.is_superuser and not self.request.user.is_staff:
-            hidden_codes += ['IE']
-        return [(key, value) for key, value in Submission.RESULT if key not in hidden_codes]
-
     def get_context_data(self, **kwargs):
         context = super(AllSubmissions, self).get_context_data(**kwargs)
         context['dynamic_update'] = context['page_obj'].number == 1
         context['last_msg'] = event.last()
-
-        context['all_languages'] = Language.objects.all().values_list('key', 'name')
-        context['selected_languages'] = self.selected_languages
-
-        context['all_statuses'] = self.get_searchable_status_codes()
-        context['selected_statuses'] = self.selected_statuses
-        context['page_suffix'] = suffix = ('?' + self.request.GET.urlencode()) if self.request.GET else ''
-        context['first_page_href'] += suffix
         return context
-
-    def get(self, request, *args, **kwargs):
-        self.selected_languages = set(request.GET.getlist('language'))
-        self.selected_statuses = set(request.GET.getlist('status'))
-        return super(AllSubmissions, self).get(request, *args, **kwargs)
 
 
 class ForceContestMixin(object):

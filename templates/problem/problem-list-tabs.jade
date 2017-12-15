@@ -1,9 +1,0 @@
-- load i18n
-
-.page-title: .tabs
-    h2(style='color:#393630') {% trans title %}
-    span.spacer
-    ul
-        if perms.judge.edit_all_problem or perms.judge.edit_public_problem or perms.judge.edit_own_problem
-            li(class=('active' if tab == 'list' else '')): a(href='{% url "problem_list" %}') {% trans "List" %}
-            li: a(href='{% url "admin:judge_problem_changelist" %}') {% trans "Admin" %}

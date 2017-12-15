@@ -11,7 +11,7 @@ class JudgeAppConfig(AppConfig):
         #          OPERATIONS MAY HAVE SIDE EFFECTS.
         #          DO NOT REMOVE THINKING THE IMPORT IS UNUSED.
         # noinspection PyUnresolvedReferences
-        from . import signals
+        from . import signals, jinja2
 
         from django.contrib.flatpages.models import FlatPage
         from django.contrib.flatpages.admin import FlatPageAdmin
@@ -24,3 +24,12 @@ class JudgeAppConfig(AppConfig):
 
         admin.site.unregister(FlatPage)
         admin.site.register(FlatPage, FlatPageVersionAdmin)
+
+        from judge.models import Language, Profile
+        from django.contrib.auth.models import User
+
+        lang = Language.get_python2()
+        for user in User.objects.filter(profile=None):
+            # These poor profileless users
+            profile = Profile(user=user, language=lang)
+            profile.save()

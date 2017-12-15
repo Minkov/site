@@ -86,7 +86,7 @@ class ProblemCaseFormSet(formset_factory(ProblemCaseForm, formset=BaseModelFormS
 
 
 class ProblemDataView(LoginRequiredMixin, TitleMixin, ProblemMixin, DetailView):
-    template_name = 'problem/data.jade'
+    template_name = 'problem/data.html'
 
     def get_title(self):
         return _('Editing data for %s') % self.object.name
@@ -98,6 +98,8 @@ class ProblemDataView(LoginRequiredMixin, TitleMixin, ProblemMixin, DetailView):
 
     def get_object(self, queryset=None):
         problem = super(ProblemDataView, self).get_object(queryset)
+        if problem.is_manually_managed:
+            raise Http404()
         if self.request.user.is_superuser or problem.is_editable_by(self.request.user):
             return problem
         raise Http404()
@@ -191,7 +193,7 @@ def problem_init_view(request, problem):
     except IOError:
         raise Http404()
 
-    return render(request, 'problem/yaml.jade', {
+    return render(request, 'problem/yaml.html', {
         'raw_source': data, 'highlighted_source': highlight_code(data, 'yaml'),
         'title': _('Generated init.yml for %s') % problem.name,
         'content_title': mark_safe(escape(_('Generated init.yml for %s')) % (
