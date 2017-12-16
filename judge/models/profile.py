@@ -94,6 +94,7 @@ class Profile(models.Model):
     math_engine = models.CharField(verbose_name=_('math engine'), choices=MATH_ENGINES_CHOICES, max_length=4,
                                    default=getattr(settings, 'MATHOID_DEFAULT_TYPE', 'auto'),
                                    help_text=_('the rendering engine used to render math'))
+    avatar = models.CharField(max_length=1000, null=True, blank=True)
 
     @cached_property
     def organization(self):
@@ -106,7 +107,8 @@ class Profile(models.Model):
         data = (Problem.objects.filter(submission__user=self, submission__points__isnull=False, is_public=True)
                 .annotate(max_points=Max('submission__points')).order_by('-max_points')
                 .values_list('max_points', flat=True).filter(max_points__gt=0))
-        extradata = Problem.objects.filter(submission__user=self, submission__result='AC', is_public=True).values('id').distinct().count()
+        extradata = Problem.objects.filter(submission__user=self, submission__result='AC', is_public=True).values(
+            'id').distinct().count()
         bonus_function = getattr(settings, 'PP_BONUS_FUNCTION', lambda n: 300 * (1 - 0.997 ** n))
         points = sum(data)
         problems = len(data)

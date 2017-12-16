@@ -1,3 +1,5 @@
+import string
+
 from django.contrib.auth.models import User
 
 from dmoj import settings
@@ -8,10 +10,12 @@ import requests
 
 from judge.models import Profile, Language
 
-class RemoteUserBackend (object):
 
+class RemoteUserBackend(object):
     def get_login_url(self, api_key, username, password):
-        return 'https://telerikacademy.com/Api/Users/CheckUserLogin?apiKey=%s&usernameoremail=%s&password=%s' % (api_key, username, password)
+        return 'https://telerikacademy.com/Api/Users/CheckUserLogin?apiKey=%s&usernameoremail=%s&password=%s' % (
+            api_key, username, password)
+
     def authenticate(self, username=None, password=None):
         # Telerik Academy Authentication
 
@@ -28,13 +32,18 @@ class RemoteUserBackend (object):
 
                 user.save()
 
-                profile, _ = Profile.objects.get_or_create(user=user, defaults={
-                    'language': Language.get_python2(),
-                    'timezone': 'Europe/Sofia',
-                })
+            profile, _ = Profile.objects.get_or_create(user=user, defaults={
+                'language': Language.get_python2(),
+                'timezone': 'Europe/Sofia',
+            })
 
-                profile.name = real_username
-                profile.save()
+            profile.name = real_username
+            small_avatar_url = result['SmallAvatarUrl']
+            normal_avatar_url = string.replace(small_avatar_url, '32x32', '180x180')
+            print(normal_avatar_url)
+            profile.avatar = normal_avatar_url
+
+            profile.save()
 
             if result['IsAdmin']:
                 user.is_staff = True
@@ -53,10 +62,3 @@ class RemoteUserBackend (object):
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-
-
-
-
-
-
-

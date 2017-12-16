@@ -45,7 +45,7 @@ block body
         tr
             td(style='padding-left:1em')
                 .user-gravatar
-                    img(src='{% gravatar_url user.user.email 135 user.mute %}', alt='gravatar', width="135px", height="135px")
+                    img(src=user.avatar)
                 br
                 // Transblock
                 b #{user.problem_count} problems solved
