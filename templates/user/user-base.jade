@@ -58,6 +58,11 @@ block body
                     |  #{user.performance_points|floatformat:0}
                 br
                 br
+
+                a(href='https://my.telerikacademy.com/Users/#{user}')
+                    | At Telerik Academy
+                br
+                br
                 a(href='{% url "all_user_submissions" user.user.username %}') {% trans "View submissions" %}
                 if ratings
                     br
