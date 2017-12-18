@@ -19,5 +19,4 @@
             if perms.judge.change_profile
                 li: a(href='{% url "admin:judge_profile_change" user.id %}') {% trans "Admin Profile" %}
         li
-            a(href='http://my.telerikacademy.com/Users/#{user.username}') View Profile
-
+            a(href='http://my.telerikacademy.com/Users/#{user.user.username}') View Profile
