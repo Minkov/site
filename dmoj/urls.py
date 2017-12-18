@@ -153,10 +153,10 @@ urlpatterns = [
         url(r'^find$', user.user_ranking_redirect, name='user_ranking_redirect'),
     ])),
 
-    url(r'^user$', user.UserAboutPage.as_view(), name='user_page'),
+    url(r'^user$', user.UserProblemsPage.as_view(), name='user_page'),
     url(r'^edit/profile/$', user.edit_profile, name='user_edit_profile'),
     url(r'^user/(?P<user>[\w\.]+)', include([
-        url(r'^$', user.UserAboutPage.as_view(), name='user_page'),
+        url(r'^$', user.UserProblemsPage.as_view(), name='user_page'),
         url(r'^/solved', include([
             url(r'^$', user.UserProblemsPage.as_view(), name='user_problems'),
             url(r'/ajax$', user.UserPerformancePointsAjax.as_view(), name='user_pp_ajax'),
