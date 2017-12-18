@@ -12,7 +12,7 @@
             li: a(href='{% url "impersonate-start" user.user.id %}') {% trans "Impersonate" %}
         if user.user == request.user
             li(class=('active' if user_tab == 'edit' else ''))
-                a(href='{% url "user_edit_profile" %}') {% trans "Edit profile" %}
+                a(href='http://my.telerikacademy.com/Users/#{request.user.username}') {% trans "Edit profile" %}
         else
             if perms.auth.change_user
                 li: a(href='{% url "admin:auth_user_change" user.user.id %}') {% trans "Admin User" %}
