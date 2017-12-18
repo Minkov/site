@@ -12,9 +12,12 @@
             li: a(href='{% url "impersonate-start" user.user.id %}') {% trans "Impersonate" %}
         if user.user == request.user
             li(class=('active' if user_tab == 'edit' else ''))
-                a(href='http://my.telerikacademy.com/Users/#{request.user.username}') {% trans "Edit profile" %}
+                a(href='http://my.telerikacademy.com/Users/Profile/Settings') {% trans "Edit profile" %}
         else
             if perms.auth.change_user
                 li: a(href='{% url "admin:auth_user_change" user.user.id %}') {% trans "Admin User" %}
             if perms.judge.change_profile
                 li: a(href='{% url "admin:judge_profile_change" user.id %}') {% trans "Admin Profile" %}
+        li
+            a(href='http://my.telerikacademy.com/Users/#{request.user.username}') View Profile
+
