@@ -47,7 +47,8 @@ def get_contest_problem(problem, profile):
 
 
 def get_contest_submission_count(problem, profile):
-    return profile.current_contest.submissions.exclude(submission__status__in=['IE']).filter(problem__problem__code=problem).count()
+    return profile.current_contest.submissions.exclude(submission__status__in=['IE']).filter(
+        problem__problem__code=problem).count()
 
 
 class ProblemMixin(object):
@@ -165,7 +166,8 @@ class ProblemDetail(ProblemMixin, SolvedProblemMixin, CommentedDetailView):
             context['clarifications'] = clarifications.order_by('-date')
             context['submission_limit'] = contest_problem.max_submissions
             if contest_problem.max_submissions:
-                context['submissions_left'] = max(contest_problem.max_submissions - get_contest_submission_count(self.object.code, user.profile), 0)
+                context['submissions_left'] = max(
+                    contest_problem.max_submissions - get_contest_submission_count(self.object.code, user.profile), 0)
 
         context['show_languages'] = self.object.allowed_languages.count() != Language.objects.count()
         context['has_pdf_render'] = HAS_PDF
@@ -269,7 +271,7 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
     manual_sort = frozenset(('name', 'group', 'solved', 'type'))
     all_sorts = sql_sort | manual_sort
     default_desc = frozenset(('points', 'ac_rate', 'user_count'))
-    default_sort = 'code'
+    default_sort = 'group'
 
     def get_paginator(self, queryset, per_page, orphans=0,
                       allow_empty_first_page=True, **kwargs):
@@ -345,12 +347,16 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
             filter |= Q(authors=self.profile)
             filter |= Q(curators=self.profile)
             filter |= Q(testers=self.profile)
+
         queryset = Problem.objects.filter(filter).select_related('group').defer('description')
+        queryset = queryset.prefetch_related('types')
+        # print (' ====== ')
+        for problem in list(queryset):
+            print(problem.types_list)
+
         if self.profile is not None and self.hide_solved:
             queryset = queryset.exclude(id__in=Submission.objects.filter(user=self.profile, points=F('problem__points'))
                                         .values_list('problem__id', flat=True))
-        if self.show_types:
-            queryset = queryset.prefetch_related('types')
         if self.category is not None:
             queryset = queryset.filter(group__id=self.category)
         if self.selected_types:
@@ -364,6 +370,7 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
                     queryset = queryset.filter(
                         Q(code__icontains=query) | Q(name__icontains=query) |
                         Q(translations__name__icontains=query, translations__language=self.request.LANGUAGE_CODE))
+        # print(list(list(queryset)[0]))
         return queryset.distinct()
 
     def get_queryset(self):
@@ -404,7 +411,8 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
 
     def setup(self, request):
         self.hide_solved = self.GET_with_session(request, 'hide_solved')
-        self.show_types = self.GET_with_session(request, 'show_types')
+        # self.show_types = self.GET_with_session(request, 'show_types')
+        self.show_types = 1
         self.full_text = self.GET_with_session(request, 'full_text')
 
         self.search_query = None
@@ -510,7 +518,7 @@ def problem_submit(request, problem=None, submission=None):
                     max_subs = contest_problem.max_submissions
                     if max_subs and get_contest_submission_count(problem, profile) >= max_subs:
                         return generic_message(request, _('Too many submissions'),
-                                                _('You have exceeded the submission limit for this problem.'))
+                                               _('You have exceeded the submission limit for this problem.'))
                     model = form.save()
                     contest = ContestSubmission(submission=model, problem=contest_problem,
                                                 participation=profile.current_contest)
@@ -543,7 +551,8 @@ def problem_submit(request, problem=None, submission=None):
         form_data = initial
     if 'problem' in form_data:
         form.fields['language'].queryset = (form_data['problem'].usable_languages.order_by('name', 'key')
-            .prefetch_related(Prefetch('runtimeversion_set', RuntimeVersion.objects.order_by('priority'))))
+            .prefetch_related(
+            Prefetch('runtimeversion_set', RuntimeVersion.objects.order_by('priority'))))
         problem_object = form_data['problem']
     if 'language' in form_data:
         form.fields['source'].widget.mode = form_data['language'].ace

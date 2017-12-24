@@ -106,8 +106,10 @@ class Problem(models.Model):
                                          'These users will be able to view a private problem, but not edit it.'))
     types = models.ManyToManyField(ProblemType, verbose_name=_('problem types'))
     group = models.ForeignKey(ProblemGroup, verbose_name=_('problem group'))
-    time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_('The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'))
-    memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_('The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'))
+    time_limit = models.FloatField(verbose_name=_('time limit'), help_text=_(
+        'The time limit for this problem, in seconds. Fractional seconds (e.g. 1.5) are supported.'))
+    memory_limit = models.IntegerField(verbose_name=_('memory limit'), help_text=_(
+        'The memory limit for this problem, in kilobytes (e.g. 64mb = 65536 kilobytes).'))
     short_circuit = models.BooleanField(default=False)
     points = models.FloatField(verbose_name=_('points'))
     partial = models.BooleanField(verbose_name=_('allows partial points'), default=False)
@@ -138,7 +140,9 @@ class Problem(models.Model):
 
     @cached_property
     def types_list(self):
-        return map(user_ugettext, map(attrgetter('full_name'), self.types.all()))
+        # return self.types.values_list('id', 'full_name')
+        return self.types.all()
+        # return map(user_ugettext, map(attrgetter('full_name'), self.types.all()))
 
     def languages_list(self):
         return self.allowed_languages.values_list('common_name', flat=True).distinct().order_by('common_name')
@@ -288,6 +292,7 @@ class Problem(models.Model):
                 pass
             else:
                 problem_data._update_code(self.__original_code, self.code)
+
     save.alters_data = True
 
     class Meta:

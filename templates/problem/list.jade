@@ -248,7 +248,7 @@ block body
                                                 =full_name
 
                             div.form-submit-group
-                                button#go.button(onclick='form.submit()') {% trans "Go" %}
+                                b#go.button(onclick='form.submit()') {% trans "Go" %}
 
         #content-left.problems
             if page_obj.num_pages > 1
@@ -271,49 +271,51 @@ block body
                             th.solved: a(href=sort_links['solved']) #[i.fa.fa-check]#{sort_order.solved}
                         th.problem: a(href=sort_links['name']) {% trans "Problem" %}#{sort_order.name}
                         th.category: a(href=sort_links['group']) {% trans "Category" %}#{sort_order.group}
-                        if show_types
-                            th: a(href=sort_links['type']) {% trans "Types" %}#{sort_order.type}
+                        th: a(href=sort_links['type']) {% trans "Types" %}#{sort_order.type}
                         th.points: a(href=sort_links['points']) {% trans "Points" %}#{sort_order.points}
                         th.ac-rate: a(href=sort_links['ac_rate']) {% trans "AC %" %}#{sort_order.ac_rate}
                         th.users: a(href=sort_links['user_count']) {% trans "Users" %}#{sort_order.user_count}
-                tbody: each problem in problems
-                    tr
-                        if request.user.is_authenticated
-                            if problem.id in completed_problem_ids
-                                td(solved='1'): a(href='{% url "user_submissions" problem.code request.user.username %}')
-                                    if problem.is_public or IN_CONTEST
-                                        i.solved-problem-color.fa.fa-check-circle
-                                    else
-                                        i.solved-problem-color.fa.fa-lock
-                            else
-                                if problem.id in attempted_problems
-                                    td(solved='0'): a(href='{% url "user_submissions" problem.code request.user.username %}')
+                tbody
+                    each problem in problems
+                        tr
+                            if request.user.is_authenticated
+                                if problem.id in completed_problem_ids
+                                    td(solved='1'): a(href='{% url "user_submissions" problem.code request.user.username %}')
                                         if problem.is_public or IN_CONTEST
-                                            i.attempted-problem-color.fa.fa-minus-circle
+                                            i.solved-problem-color.fa.fa-check-circle
                                         else
-                                            i.attempted-problem-color.fa.fa-lock
+                                            i.solved-problem-color.fa.fa-lock
                                 else
-                                    td(solved='-1')
-                                        if problem.is_public or IN_CONTEST
-                                            i.unsolved-problem-color.fa.fa-minus-circle
-                                        else
-                                            i.unsolved-problem-color.fa.fa-lock
-                        td.problem
-                            a(href='{% url "problem_detail" problem.code %}')= problem.i18n_name
-                        td.category= problem.group.full_name
-                        if show_types
-                            td.types
-                                each type in problem.types_list
-                                    span.type-tag= type
-                                    if not forloop.last
-                                        = ', '
-                        td.p #{problem.points | floatformat}
-                            if problem.partial
-                                | p
-                        if not IN_CONTEST
-                            td.ac-rate #{problem.ac_rate | floatformat:"1"}%
-                        td.users
-                            a(href='{% url "ranked_submissions" problem.code %}')= problem.user_count
+                                    if problem.id in attempted_problems
+                                        td(solved='0'): a(href='{% url "user_submissions" problem.code request.user.username %}')
+                                            if problem.is_public or IN_CONTEST
+                                                i.attempted-problem-color.fa.fa-minus-circle
+                                            else
+                                                i.attempted-problem-color.fa.fa-lock
+                                    else
+                                        td(solved='-1')
+                                            if problem.is_public or IN_CONTEST
+                                                i.unsolved-problem-color.fa.fa-minus-circle
+                                            else
+                                                i.unsolved-problem-color.fa.fa-lock
+                            td.problem
+                                a(href='{% url "problem_detail" problem.code %}')= problem.i18n_name
+                            td.category
+                                a(href='/problems/?category=#{problem.group.id}')
+                                    = problem.group.full_name
+                            if show_types
+                                td.types
+                                    each type in problem.types_list
+                                        a(href='/problems/?type=#{type.id}')= type.full_name
+                                        if not forloop.last
+                                            = ', '
+                            td.p #{problem.points | floatformat}
+                                if problem.partial
+                                    | p
+                            if not IN_CONTEST
+                                td.ac-rate #{problem.ac_rate | floatformat:"1"}%
+                            td.users
+                                a(href='{% url "ranked_submissions" problem.code %}')= problem.user_count
             if page_obj.num_pages > 1
                 div(style='margin-top:10px;')
                     include list-pages
