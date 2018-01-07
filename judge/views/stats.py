@@ -34,15 +34,16 @@ def repeat_chain(iterable):
 
 
 def language_data(request, language_count=Language.objects.annotate(count=Count('submission'))):
-    languages = language_count.filter(count__gte=1000).values('key', 'name', 'short_name', 'count').order_by('-count')
+    languages = language_count.filter(count__gte=50).values('key', 'name', 'short_name', 'count').order_by('-count')
     data = []
     for language, color, highlight in zip(languages, chart_colors, highlight_colors):
         data.append({
             'value': language['count'], 'label': language['name'],
             'color': color, 'highlight': highlight,
         })
+
     data.append({
-        'value': language_count.filter(count__lt=1000).aggregate(total=Sum('count'))['total'],
+        'value': language_count.filter(count__lt=50).aggregate(total=Sum('count'))['total'],
         'label': 'Other', 'color': '#FDB45C', 'highlight': '#FFC870',
     })
     return JsonResponse(data, safe=False)
@@ -73,8 +74,11 @@ def status_data(request, statuses=None):
 
 def ac_rate(request):
     rate = CombinedExpression(ac_count / Count('submission'), '*', Value(100.0), output_field=FloatField())
-    data = Language.objects.annotate(total=Count('submission'), ac_rate=rate).filter(total__gt=0) \
-        .values('key', 'name', 'short_name', 'ac_rate').order_by('total')
+    data = Language.objects.annotate(total=Count('submission'), ac_rate=rate)\
+        .filter(total__gt=0) \
+        .values('key', 'name', 'short_name', 'ac_rate')\
+        .order_by('total')
+
     return JsonResponse({
         'labels': map(itemgetter('name'), data),
         'datasets': [
