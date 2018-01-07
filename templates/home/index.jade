@@ -1,0 +1,273 @@
+extends base
+- load staticfiles
+- load cache
+- load markdown
+- load timedelta
+- load i18n
+- load tz
+- load reference
+- load dicts
+- load rating
+
+block title_row
+
+block title_ruler
+
+block media
+    link(rel='alternate', type='application/atom+xml', href='{% url "blog_atom" %}', title='Atom Blog Feed')
+    link(rel='alternate', type='application/rss+xml', href='{% url "blog_rss" %}', title='RSS Blog Feed')
+    link(rel='alternate', type='application/atom+xml', href='{% url "comment_atom" %}', title='Atom Comment Feed')
+    link(rel='alternate', type='application/rss+xml', href='{% url "comment_rss" %}', title='RSS Comment Feed')
+    link(rel='alternate', type='application/atom+xml', href='{% url "problem_atom" %}', title='Atom Problem Feed')
+    link(rel='alternate', type='application/rss+xml', href='{% url "problem_rss" %}', title='RSS Problem Feed')
+    script(src='{% static "timeup.js" %}')
+    include blog/media-css.jade
+    style.
+        .sidebox h3 {
+            margin: 0 -5px;
+            background: #43a700;
+            border-radius: 4px 4px 0px 0px;
+            color: white;
+            padding-top: 2px;
+            padding-bottom: 4px;
+            padding-left: 7px;
+        }
+
+        .sidebox h3 .fa {
+            color: white;
+            float: right;
+            margin: 0.2em 0.4em 0 0;
+        }
+
+        .sidebox {
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            margin-top: 0.5em;
+            padding: 0 5px !important;
+        }
+
+        .blog-content.sidebox {
+            margin-right: 1em;
+        }
+
+        .sidebox-content {
+            border: 1px solid #9D9D9D;
+            border-top: none;
+            margin: 0 -5px;
+            padding: 0 0.5em;
+            padding-top: 1px;
+            padding-bottom: 3px;
+        }
+
+        .post {
+            margin: 0 1.4em;
+        }
+
+        .post:first-child {
+            margin-top: 0.6em;
+        }
+
+        .comment-count {
+            font-size: 12px;
+        }
+
+        .comment-icon {
+            padding: 0.1em 0.2em 0 0.5em;
+        }
+
+        .comment-count-link {
+            color: #555;
+        }
+
+        .own-open-tickets .title a, .open-tickets .title a {
+            display: block;
+        }
+
+        .own-open-tickets .object, .open-tickets .object {
+            margin-left: 1em;
+            font-style: italic;
+        }
+
+        .open-tickets .user {
+            margin-left: 1em;
+        }
+
+        .no-clarifications-message {
+            font-style: italic;
+            text-align: center;
+        }
+
+block js_media
+    include blog/media-js.jade
+    script(type='text/javascript').
+        $(document).ready(function () {
+            $('.time-remaining').each(function () {
+                count_down($(this));
+            });
+
+            $('.blog-sidebar').hide();
+            $('#blog-tab').find('a').click(function (e) {
+                e.preventDefault();
+                $('#blog-tab').addClass('active');
+                $('#event-tab').removeClass('active');
+                $('.blog-content').show();
+                $('.blog-sidebar').hide();
+            });
+            $('#event-tab').find('a').click(function (e) {
+                e.preventDefault();
+                $('#event-tab').addClass('active');
+                $('#blog-tab').removeClass('active');
+                $('.blog-content').hide();
+                $('.blog-sidebar').show();
+            });
+            register_update_relative(function () {
+                return $('.post-time');
+            }, function (when) {
+                return Math.abs(moment().diff(when, 'years')) < 1;
+            });
+        });
+    script(type='text/javascript').
+        $(function() {
+            var easingFn = function (t, b, c, d) {
+                var ts = (t /= d) * t;
+                var tc = ts * t;
+                return b + c * (tc * ts + -5 * ts * ts + 10 * tc + -10 * ts + 5 * t);
+            }
+            var options = {
+                useEasing: true,
+                easingFn: easingFn,
+                useGrouping: true,
+                separator: ',',
+                decimal: '.',
+            };
+
+            var ids = [
+                'count-problems',
+                'count-solved-problems',
+                'count-users',
+                'count-submissions',
+                'count-languages',
+            ];
+
+            for(var i = 0; i < ids.length; i += 1) {
+                var id = ids[i];
+                console.log(id);
+                var toCount = +($('#' + id).attr('count'));
+                var demo = new CountUp(id, 0, toCount, 0, 2.5, options);
+                if (!demo.error) {
+                    demo.start();
+                } else {
+                    console.error(demo.error);
+                }
+            }
+
+        })
+block body
+    #blog-container
+        .blog-content.sidebox
+            .sidebox-content.problems
+                h2 Welcome to Telerik Academy Judge!
+                .list.list-horizontal.list-problems
+                    li.list-item
+                        span Problems
+                        strong#count-problems(count=problem_count)
+                    li.list-item
+                        span Solved problems
+                        strong#count-solved-problems(count=ac_problem_count)
+                    li.list-item
+                        span Users
+                        strong#count-users(count=user_count)
+                    li.list-item
+                        span Submissions
+                        strong#count-submissions(count=submission_count)
+                    li.list-item
+                        span Languages
+                        strong#count-languages(count=language_count)
+            h3 {% trans "Latest Editorials" %} #[i.fa.fa-trophy]
+            .sidebox-content(style="border: 0")
+                ul.list
+                    for editorial in latest_editorials
+                        li.list-item
+                            a(href='{% url "problem_detail" editorial.problem.code %}', style="font-size: 1.1em")
+                                | Problem
+                                = editorial.problem.name
+                            | ,
+                            a(href='{% url "problem_editorial" editorial.problem.code %}')
+                                |  Read editorial
+
+        .blog-sidebar
+            if IN_CONTEST and CONTEST.contest.use_clarifications
+                .blog-sidebox.sidebox
+                    h3 {% trans "Clarifications" %} #[i.fa.fa-question-circle]
+                    .sidebox-content
+                        if has_clarifications
+                            ul
+                                for clarification in clarifications
+                                    li.clarification
+                                        a.problem(href='{% url "problem_detail" clarification.problem.code %}')=clarification.problem.name
+                                        = ' '
+                                        span.time(data-unix='{{ clarification.date|utc|date:"c" }}')
+                                            - blocktrans with time=clarification.date|date:_("N j, Y, g:i a") asvar str_time
+                                                | on {{ time }}
+                                            span.relative= str_time
+                        else
+                            p.no-clarifications-message {% trans "No clarifications have been made at this time." %}
+            if current_contests
+                .blog-sidebox.sidebox
+                    h3 {% trans "Ongoing contests" %} #[i.fa.fa-trophy]
+                    .sidebox-content
+                        each contest in current_contests
+                            .contest
+                                .name: a(href='{% url "contest_view" contest.key %}')= contest.name
+                                .time
+                                    - blocktrans with countdown=contest.time_before_end|as_countdown
+                                        | Ends in {{ countdown }}.
+            if future_contests
+                .blog-sidebox.sidebox
+                    h3 {% trans "Upcoming contests" %} #[i.fa.fa-trophy]
+                    .sidebox-content
+                        each contest in future_contests
+                            .contest
+                                .name: a(href='{% url "contest_view" contest.key %}')= contest.name
+                                .time
+                                    - blocktrans with countdown=contest.time_before_start|as_countdown
+                                        | Starting in {{ countdown }}.
+            .blog-sidebox.sidebox
+                h3 {% trans "Comment stream" %} #[i.fa.fa-comments]
+                .sidebox-content
+                    ul: for comment in comments
+                        li
+                            span.poster(class='rating {{ comment.author.rating|rating_class }} {{ comment.author.display_rank }}', style='padding-left:0.25em')
+                                a(href='{% url "user_page" comment.author.user.username %}')= comment.author.user.username
+                            | &#32;&rarr; #[a(href='{{comment.link}}#comment-{{comment.id}}')= comment.page_title]
+                    span.rssatom
+                        a(href='{% url "comment_rss" %}') #[span: i.fa.fa-rss] RSS
+                        | / #[a(href='{% url "comment_atom" %}') Atom]
+            .blog-sidebox.sidebox
+                h3 {% trans "New problems" %} #[i.fa.fa-puzzle-piece]
+                .sidebox-content
+                    ul.problem-list: for problem in new_problems
+                        li: a(href='{% url "problem_detail" problem.code %}')= problem.name
+                    span.rssatom
+                        a(href='{% url "problem_rss" %}') #[span: i.fa.fa-rss] RSS
+                        | / #[a(href='{% url "problem_atom" %}') Atom]
+            if perms.judge.test_site and own_open_tickets
+                .blog-sidebox.sidebox
+                    h3 {% trans "My open tickets" %} #[i.fa.fa-question-circle]
+                    .sidebox-content
+                        ul.own-open-tickets: each ticket in own_open_tickets
+                            li
+                                .title: a(href='{% url "ticket" ticket.id %}')= ticket.title
+                                .object: a(href=ticket.linked_item.get_absolute_url()) #{ticket.linked_item|item_title}
+            if perms.judge.test_site and open_tickets
+                .blog-sidebox.sidebox
+                    h3 {% trans "New tickets" %} #[i.fa.fa-exclamation-circle]
+                    .sidebox-content
+                        ul.open-tickets: each ticket in open_tickets
+                            li
+                                .title: a(href='{% url "ticket" ticket.id %}')= ticket.title
+                                .object: a(href=ticket.linked_item.get_absolute_url()) #{ticket.linked_item|item_title}
+                                - with user=ticket.user
+                                    .user(class=user.display_rank)
+                                        a(href='{% url "user_page" user.user.username %}') #{user.user.username}
+    block after_posts

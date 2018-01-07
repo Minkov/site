@@ -6,7 +6,8 @@ from django.utils.translation import ugettext as _
 from django.views.generic import ListView
 
 from judge.comments import CommentedDetailView
-from judge.models import BlogPost, Comment, Problem, Contest, Profile, Submission, Language, ProblemClarification
+from judge.models import BlogPost, Comment, Problem, Contest, Profile, Submission, Language, ProblemClarification, \
+    Solution
 from judge.models import Ticket
 from judge.utils.diggpaginator import DiggPaginator
 from judge.utils.problems import user_completed_ids
@@ -47,8 +48,11 @@ class PostList(ListView):
 
         context['user_count'] = Profile.objects.count()
         context['problem_count'] = Problem.objects.filter(is_public=True).count()
+        context['ac_problem_count'] = Problem.objects.filter(ac_rate__gt=0).count()
         context['submission_count'] = Submission.objects.filter(problem__is_public=True).count()
         context['language_count'] = Language.objects.count()
+        context['latest_editorials'] = Solution.objects.filter(is_public=True) \
+                                           .order_by('-publish_on', '-id')[:7]
 
         context['post_comment_counts'] = {
             int(page[2:]): count for page, count in
