@@ -102,7 +102,7 @@ class Profile(models.Model):
         orgs = self.organizations.all()
         return orgs[0] if orgs else None
 
-    def calculate_points(self, table=(lambda x: [pow(x, i) for i in xrange(100)])(getattr(settings, 'PP_STEP', 0.97))):
+    def calculate_points(self, table=(lambda x: [pow(x, i) for i in xrange(100)])(getattr(settings, 'PP_STEP', 0.95))):
         from judge.models import Problem
         data = (Problem.objects.filter(submission__user=self, submission__points__isnull=False, is_public=True)
                 .annotate(max_points=Max('submission__points')).order_by('-max_points')
