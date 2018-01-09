@@ -45,7 +45,7 @@ class ProfileAdmin(VersionAdmin):
     fields = ('user', 'name', 'display_rank', 'about', 'organizations', 'timezone', 'language', 'ace_theme',
               'math_engine', 'last_access', 'ip', 'mute', 'user_script', 'current_contest')
     readonly_fields = ('user',)
-    list_display = ('admin_user_admin', 'email', 'timezone_full', 'date_joined', 'last_access', 'ip', 'show_public')
+    list_display = ('admin_user_admin', 'email', 'timezone_full', 'date_joined', 'last_access', 'ip', 'show_public', 'language')
     ordering = ('user__username',)
     search_fields = ('user__username', 'name', 'ip', 'user__email')
     list_filter = ('language', TimezoneFilter)
