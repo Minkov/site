@@ -35,7 +35,7 @@
                                 else
                                     a.downvote-link.fa.fa-chevron-down.fa-fw(href='javascript:void(0)', title='{% trans "Please login to vote" %}')
                             a.user(href='{% url "user_page" node.author.user.username %}')
-                                img.gravatar(src='{% gravatar_url node.author.user.email 135 node.author.mute %}')
+                                img(src=node.author.avatar)
                         .detail
                             .header
                                 a.username(href='{% url "user_page" node.author.user.username %}',
