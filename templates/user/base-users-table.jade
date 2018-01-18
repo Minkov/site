@@ -8,6 +8,7 @@ thead
         block after_rank_head
         th Avatar
         th.header.username {% trans "Username" %}
+        th.header.lang {% trans "Language" %}
         block before_point_head
         if sort_links
             th.header.points: a(href=sort_links['performance_points']) {% trans "Points" %}#{sort_order.performance_points}
@@ -25,6 +26,8 @@ tbody
                         img(src=user.avatar)
             td.user-name(class='rating {{ user.rating|rating_class }} {{ user.display_rank }}')
                 a(href='{% url "user_page" user.user.username %}')= user.user.username
+            td.lang
+                =user.language
             block before_point
             block point
                 td.user-points(title='{{ user.performance_points|floatformat:2 }}') #{user.performance_points|floatformat:0}
