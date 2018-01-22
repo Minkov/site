@@ -175,9 +175,6 @@ block body
                 br
                 hr.half-hr
                 br
-                form(action='{% url "submission_abort" submission.id %}', method='post')
-                    -csrf_token
-                    input.button(style='float:left', type='submit', value='{% trans "Abort" %}')
-                    br
-                    br
+                a.button(style='float:left', onClick='window.location.reload()')
+                  | Refresh
             
