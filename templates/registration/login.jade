@@ -9,31 +9,37 @@ block media
             top: 40%;
             left: 50%;
         }
+
         h4 {
-            padding-top:1em;
+            padding-top: 1em;
         }
+
         .social {
-            display:inline;
-            font-size:2.3em;
+            display: inline;
+            font-size: 2.3em;
             float: none;
         }
+
         .google-icon i {
-            color:#DD4B38;
+            color: #DD4B38;
         }
+
         .facebook-icon i {
-            color:#133783;
+            color: #133783;
         }
+
         .github-icon i {
-            color:black;
+            color: black;
         }
+
         .dropbox-icon i {
-            color:#55ACEE;
+            color: #55ACEE;
         }
 block body
     #login-panel
         form.form-area(action='', method='post')
             -csrf_token
-            
+
             if form.errors
                 #form-errors
                     p.error {% trans "Invalid username or password." %}
@@ -52,7 +58,7 @@ block body
             button(style="float:right;", type='submit') {% trans "Login!" %}
             input(type='hidden', name='next', value=next)
         br
-        a(href='{% url "password_reset" %}') {% trans "Forgot your password?" %}
+        a(href='https://my.telerikacademy.com/Users/Auth/ForgottenPassword') {% trans "Forgot your password?" %}
         if form.has_google_auth or form.has_facebook_auth or form.has_github_auth or form.has_dropbox_auth
             h4 {% trans "Or log in with..." %}
             if form.has_google_auth
