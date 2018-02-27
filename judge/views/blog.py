@@ -49,7 +49,7 @@ class PostList(ListView):
         context['user_count'] = Profile.objects.count()
         context['problem_count'] = Problem.objects.filter(is_public=True).count()
         context['ac_problem_count'] = Problem.objects.filter(is_public=True, ac_rate__gt=0).count()
-        context['submission_count'] = Submission.objects.filter(problem__is_public=True).count()
+        context['submission_count'] = Submission.objects.all().count()
         context['language_count'] = Language.objects.count()
         context['contest_count'] = Contest.objects.count()
 
