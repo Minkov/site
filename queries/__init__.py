@@ -2,3 +2,4 @@ from .change_all_cpp import update_all_to_latest_cpp
 from .all_users_with_submissions_for_lang import get_all_users_with_lang
 from .update_user_preferred_langs import update_preferred_langs
 from .download_best_solutions_of_contest import down
+from .add_to_organization import add_to_org
