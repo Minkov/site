@@ -135,6 +135,7 @@ class ProblemSolution(SolvedProblemMixin, ProblemMixin, TitleMixin, CommentedDet
                 not self.request.user.has_perm('judge.see_private_solution'):
             raise Http404()
         context['solution'] = solution
+        context['author'] = solution.authors.all().first()
         context['has_solved_problem'] = self.object.id in self.get_completed_problems()
         return context
 
