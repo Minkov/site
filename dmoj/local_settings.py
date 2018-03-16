@@ -24,7 +24,7 @@ ALLOWED_HOSTS = [
         # u'10.0.2.15',
 	u'127.0.0.1',
         u'localhost',
-	u'192.168.168.27'
+	u'192.168.160.24'
 ]
 
 # Optional apps that DMOJ can make use of.

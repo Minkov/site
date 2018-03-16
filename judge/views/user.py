@@ -3,10 +3,12 @@ import json
 import django
 from datetime import datetime
 from django.conf import settings
+from django.contrib import auth
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.contenttypes.models import ContentType
+import requests
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Max, Count, Min
@@ -19,6 +21,7 @@ from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _, ugettext_lazy
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import DetailView, ListView
 from reversion import revisions
 
@@ -280,3 +283,47 @@ def user_ranking_redirect(request):
     rank += Profile.objects.filter(points__exact=user.points, id__lt=user.id).count()
     page = rank // UserList.paginate_by
     return HttpResponseRedirect('%s%s#!%s' % (reverse('user_list'), '?page=%d' % (page + 1) if page else '', username))
+
+
+def login(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/')
+
+    return render(request, 'auth/login.html')
+
+@csrf_protect
+def logout(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect('/')
+
+    auth.logout(request)
+    return render(request, 'auth/logout.html')
+
+def signin_oidc(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/')
+
+    return render(request, 'auth/signin_oidc.html')
+
+@csrf_protect
+def token(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/')
+
+    access_token = request.POST['access_token']
+    headers = {'Authorization': 'Bearer ' + access_token}
+    response = requests.post('https://auth.telerikacademy.com/connect/userinfo', headers=headers)
+    result = json.loads(response.content)
+    print(result)
+    username = result['name']
+    email = result['email']
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        user = User(username=username)
+        user.save()
+
+    auth.login(request, user, 'django.contrib.auth.backends.ModelBackend')
+
+    return HttpResponseRedirect('/')

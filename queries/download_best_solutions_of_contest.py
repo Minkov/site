@@ -27,6 +27,9 @@ def down(contest_key):
     # pprint(vars(contest))
     for participation in ContestParticipation.objects.filter(contest__key=contest_key):
         submissions = participation.submissions.all()
+        print(" --- Submissions of %s ---" % participation.user)
+        if participation.user.user.username == "RadikMih":
+            continue
         for contest_submission in submissions:
             submission = contest_submission.submission
             # pprint(vars(submission))
