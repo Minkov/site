@@ -261,9 +261,9 @@ block body
                         if request.user.is_authenticated
                             th.solved: i.fa.fa-check
                         th.problem {% trans "Problem" %}
-                        th.category {% trans "Category" %}
-                        if show_types
-                            th {% trans "Types" %}
+                        // th.category {% trans "Category" %}
+                        // if show_types
+                        //    th {% trans "Types" %}
                         th.points {% trans "Points" %}
                         th.users {% trans "Users" %}
                     else
@@ -300,15 +300,16 @@ block body
                                                 i.unsolved-problem-color.fa.fa-lock
                             td.problem
                                 a(href='{% url "problem_detail" problem.code %}')= problem.i18n_name
-                            td.category
-                                a(href='/problems/?category=#{problem.group.id}')
-                                    = problem.group.full_name
-                            if show_types
-                                td.types
-                                    each type in problem.types_list
-                                        a(href='/problems/?type=#{type.id}')= type.full_name
-                                        if not forloop.last
-                                            = ', '
+                            if not IN_CONTEST
+                                td.category
+                                    a(href='/problems/?category=#{problem.group.id}')
+                                        = problem.group.full_name
+                                if show_types
+                                    td.types
+                                        each type in problem.types_list
+                                            a(href='/problems/?type=#{type.id}')= type.full_name
+                                                if not forloop.last
+                                                    = ', '
                             td.p #{problem.points | floatformat}
                                 if problem.partial
                                     | p
