@@ -15,11 +15,13 @@ def write_source(username, filename, source, contest_key):
     prefix = '/vagrant/sources/%s' % contest_key
     dirname = '%s/%s' % (prefix, username)
     filepath = '%s/%s' % (dirname, filename)
+    # source = source.encode('utf-8')
     f = open(filepath, 'w')
     print(source, file=f)
 
 
 def down(contest_key):
+
     # contest_key = "dn1711e2"
     # from pprint import pprint
     # contest = Contest.objects.filter(key=contest_key).first()
@@ -29,6 +31,7 @@ def down(contest_key):
         submissions = participation.submissions.all()
         for contest_submission in submissions:
             submission = contest_submission.submission
+            print(submission.id)
             # pprint(vars(submission))
             create_user_dir(contest_key, submission.user)
             filename = '%s-%s.txt' % (submission.problem.code, submission.id)

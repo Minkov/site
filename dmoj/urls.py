@@ -335,6 +335,18 @@ urlpatterns = [
     ])),
 ]
 
+from judge.views import oidc
+# from judge.views.oidc import login as oidc_login
+
+urlpatterns += [
+    url(r'^oidc/login$', oidc.login),
+    url(r'^oidc/logout$', oidc.logout),
+    url(r'^oidc/signin-oidc$', oidc.signin_oidc),
+    url(r'^signin-oidc$', oidc.signin_oidc),
+    url(r'^oidc/token$', oidc.token),
+    url(r'^token$', oidc.token),
+]
+
 favicon_paths = ['apple-touch-icon-180x180.png', 'apple-touch-icon-114x114.png', 'android-chrome-72x72.png',
                  'apple-touch-icon-57x57.png', 'apple-touch-icon-72x72.png', 'apple-touch-icon.png', 'mstile-70x70.png',
                  'android-chrome-36x36.png', 'apple-touch-icon-precomposed.png', 'apple-touch-icon-76x76.png',
