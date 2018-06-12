@@ -47,34 +47,23 @@ def token(request):
     keys = json.loads(keys_raw)
 
     access_token = request.POST['access_token']
-    print(' --- Marker 1 ---', datetime.datetime.now())
     claims = json.loads(jws.verify(access_token, keys, algorithms=['RS256']))
-    print(' --- Marker 2 ---', datetime.datetime.now())
     email = claims['emails']
-    print(claims)
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        print(' --- Here 1 ---')
-        print(email)
         username = email[:email.index('@')]
         user = User(username=username, email=email)
-        print(' --- Here 2 ---')
         user.save()
-        print(' --- Here 2 ---')
 
     profile, _ = Profile.objects.get_or_create(user=user, defaults={
         'language': Language.get_python2(),
         'timezone': 'Europe/Sofia',
     })
 
-    print(' --- Here 3 ---')
-
     profile.name = email
-    print(' --- Here 4 ---')
 
     profile.save()
-    print(' --- Here 5 ---')
 
     # if result['IsAdmin']:
     #     user.is_staff = True
