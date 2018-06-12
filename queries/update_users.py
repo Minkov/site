@@ -1,4 +1,5 @@
 import json
+import string
 import urllib
 
 import requests
@@ -6,6 +7,7 @@ from django.contrib.auth.models import User
 from django.db.backends.mysql.base import IntegrityError
 
 from dmoj import settings
+from judge.models import Profile, Language
 
 
 def get_url(users):
@@ -53,9 +55,18 @@ def update_users(group_size=10):
                     continue
                 user = users_by_username[username]
                 user.email = email
-                user.username = email[:email.index('@')]
+                user.username = email
+                profile, _ = Profile.objects.get_or_create(user=user, defaults={
+                    'language': Language.get_python2(),
+                    'timezone': 'Europe/Sofia',
+                })
+
+                profile.name = email[:email.index('@')]
+
+                profile.avatar = user_dicts_by_username[username]['ProfileAvatarUrl']
+                profile.save()
                 try:
-                    users_by_username[username].save()
+                    user.save()
                 except:
                     print(username)
                     # print(found)

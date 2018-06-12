@@ -39,21 +39,24 @@ def signin_oidc(request):
 def token(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect('/')
+    print(' --- /token ---', datetime.datetime.now())
 
     # keys_raw = requests.get(
     #     'https://login.microsoftonline.com/tfp/telerikacademyidentity.onmicrosoft.com/B2C_1A_signup_signin/discovery/keys').text
     keys_raw = requests.get(
         'https://login.microsoftonline.com/tfp/telerikacademyauth.onmicrosoft.com/B2C_1A_signup_signin/discovery/keys').text
     keys = json.loads(keys_raw)
-
+    print('1')
     access_token = request.POST['access_token']
+    print('2')
     claims = json.loads(jws.verify(access_token, keys, algorithms=['RS256']))
+    print('3')
+
     email = claims['emails']
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        username = email[:email.index('@')]
-        user = User(username=username, email=email)
+        user = User(username=email, email=email)
         user.save()
 
     profile, _ = Profile.objects.get_or_create(user=user, defaults={
@@ -61,7 +64,7 @@ def token(request):
         'timezone': 'Europe/Sofia',
     })
 
-    profile.name = email
+    profile.name = email[:email.index('@')]
 
     profile.save()
 
@@ -71,7 +74,7 @@ def token(request):
     # else:
     #     user.is_staff = False
     #     user.is_superuser = False
-    user.save()
+    # user.save()
     auth.login(request, user, 'django.contrib.auth.backends.ModelBackend')
 
     return HttpResponseRedirect('/')

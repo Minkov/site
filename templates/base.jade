@@ -151,7 +151,7 @@ html(lang=LANGUAGE_CODE)
                         li
                             a(href='{% url "user_page" %}'): span                                
                                 span
-                                    - blocktrans with username=request.user.username
+                                    - blocktrans with username=request.user.profile.name
                                         | Hello, #[b {{ username }}].
                             ul(style='width: 150px')
                                 if request.user.is_staff or request.user.is_superuser
