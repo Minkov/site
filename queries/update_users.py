@@ -55,7 +55,8 @@ def update_users(group_size=10):
                     continue
                 user = users_by_username[username]
                 user.email = email
-                user.username = email
+                user.username = ''.join(x for x in email if x.isalnum() or x == '_')
+                print(user.username)
                 profile, _ = Profile.objects.get_or_create(user=user, defaults={
                     'language': Language.get_python2(),
                     'timezone': 'Europe/Sofia',
