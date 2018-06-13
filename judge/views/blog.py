@@ -96,6 +96,10 @@ class PostList(ListView):
             context['open_tickets'] = filter_visible_tickets(tickets, self.request.user, profile)[:10]
         else:
             context['open_tickets'] = []
+
+        for key in context:
+            print(key, context[key])
+
         return context
 
 

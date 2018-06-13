@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <form id="loginForm" action="/oidc/token" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="access_token" />
+    </form>
+<script
+  src="https://code.jquery.com/jquery-1.12.4.min.js"
+  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+  crossorigin="anonymous"></script>
+<script src="/static/oidc/hello.all.js"></script>
+<script src="/static/oidc/aadb2cSettings.js"></script>
+    <script>
+        var loginResponse = hello(helloNetwork.adB2CSignInSignUp).getAuthResponse();
+        var passResetResponse = hello(helloNetwork.adB2CPasswordReset).getAuthResponse();
+        var isPassResetSucc = passResetResponse && passResetResponse.access_token;
+        var isLoginSucc = loginResponse && loginResponse.access_token;
+        var isPassResetRequest = loginResponse
+                              && loginResponse.error
+                              && loginResponse.error.message.indexOf('AADB2C90118') !== -1
+                              && (!passResetResponse || !passResetResponse.error);
+
+        if (isPassResetSucc) {
+            $('input[name=access_token]').val(passResetResponse.access_token);
+            $('#loginForm').submit();
+        } else if (isLoginSucc) {
+            $('input[name=access_token]').val(loginResponse.access_token);
+            $('#loginForm').submit();
+        } else if (isPassResetRequest) {
+            hello(helloNetwork.adB2CPasswordReset).login({ display: 'page' });
+        } else {
+            hello(helloNetwork.adB2CSignInSignUp).logout(helloNetwork.adB2CSignInSignUp, { force: true });
+            hello(helloNetwork.adB2CPasswordReset).logout(helloNetwork.adB2CPasswordReset, { force: true });
+            window.location = '/';
+        }
+    </script>
+</body>
+</html>

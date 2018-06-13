@@ -151,8 +151,9 @@ html(lang=LANGUAGE_CODE)
                         li
                             a(href='{% url "user_page" %}'): span                                
                                 span
-                                    - blocktrans with username=request.user.username
-                                        | Hello, #[b {{ username }}].
+                                    - blocktrans with username=request.user.profile.name
+                                        // | Hello, #[b {{ request.user.profile.name }}].
+                                        | Profile
                             ul(style='width: 150px')
                                 if request.user.is_staff or request.user.is_superuser
                                     li: a(href='{% url "admin:index" %}') {% trans "Admin" %}
@@ -160,13 +161,11 @@ html(lang=LANGUAGE_CODE)
                                 if request.user.is_impersonate
                                     li: a(href='{% url "impersonate-stop" %}') Stop impersonating
                                 else
-                                    li: a(href='{% url "auth_logout" %}?next=') {% trans "Log out" %}
+                                    li: a(href='/oidc/logout?next=') {% trans "Log out" %}
                     else
                         li
-                            a(href='{% url "auth_login" %}?next={{ LOGIN_RETURN_PATH|urlencode }}')
+                            a(href='/oidc/login?next={{ LOGIN_RETURN_PATH|urlencode }}')
                                 b {% trans "Login" %}
-                            | &nbsp;|&nbsp;
-                            a(href='{% url "registration_register" %}') {% trans "Register" %}
         if IN_CONTEST
             #contest-info
                 a(href='{% url "contest_view" CONTEST.contest.key %}', style='vertical-align: middle;')

@@ -1,0 +1,15 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+<script src="/static/oidc/hello.all.js"></script>
+<script src="/static/oidc/aadb2cSettings.js"></script>
+    <script>
+        hello(helloNetwork.adB2CSignInSignUp).logout(helloNetwork.adB2CSignInSignUp, { force: true });
+        hello(helloNetwork.adB2CPasswordReset).logout(helloNetwork.adB2CPasswordReset, { force: true });
+    </script>
+</body>
+</html>

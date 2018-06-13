@@ -242,7 +242,7 @@ block body
                     ul: for comment in comments
                         li
                             span.poster(class='rating {{ comment.author.rating|rating_class }} {{ comment.author.display_rank }}', style='padding-left:0.25em')
-                                a(href='{% url "user_page" comment.author.user.username %}')= comment.author.user.username
+                                = comment.author.user.profile.name
                             | &#32;&rarr; #[a(href='{{comment.link}}#comment-{{comment.id}}')= comment.page_title]
                     span.rssatom
                         a(href='{% url "comment_rss" %}') #[span: i.fa.fa-rss] RSS
