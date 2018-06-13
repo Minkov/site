@@ -56,7 +56,8 @@ def token(request):
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
-        user = User(username=email, email=email)
+        username = ''.join(ch for ch in email if ch.isalnum() or ch == '_')
+        user = User(username=username, email=email)
         user.save()
 
     profile, _ = Profile.objects.get_or_create(user=user, defaults={
