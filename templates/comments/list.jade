@@ -39,7 +39,7 @@
                         .detail
                             .header
                                 a.username(href='{% url "user_page" node.author.user.username %}',
-                                           class='rating {{ node.author.rating|rating_class }} {{node.author.display_rank}}') #{node.author.user.username}
+                                           class='rating {{ node.author.rating|rating_class }} {{node.author.display_rank}}') #{node.author.user.profile.name}
                                 .relative-time
                                 span.comment-time(data-unix='{{ node.time|utc|date:"c" }}')
                                     | &nbsp;{% trans "commented" %}
