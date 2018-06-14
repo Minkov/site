@@ -52,7 +52,7 @@ block title_row
     div.problem-title
         if request.user.is_authenticated
             if problem.id in completed_problem_ids
-                a(href='{% url "user_submissions" problem.code request.user.username %}')
+                a(href='{% url "user_submissions" problem.code request.user.profile.name %}')
                     if problem.is_public or IN_CONTEST
                         i.solved-problem-color.title-state.fa.fa-check-circle
                     else
@@ -162,7 +162,7 @@ block info_float
                             | Authors:
                     div.pi-value.authors-value: for author in authors
                         span(class=author.display_rank)
-                            a(href='{% url "user_page" author.user.username %}') #{author.user.username}
+                            a(href='{% url "user_page" author.user.username %}') #{author.user.profile.name}
                         if not forloop.last
                             = ', '
     br
