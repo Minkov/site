@@ -152,8 +152,7 @@ html(lang=LANGUAGE_CODE)
                             a(href='{% url "user_page" %}'): span                                
                                 span
                                     - blocktrans with username=request.user.profile.name
-                                        // | Hello, #[b {{ request.user.profile.name }}].
-                                        | Profile
+                                        | Hello, #[b {{ request.user.profile.name }}].
                             ul(style='width: 150px')
                                 if request.user.is_staff or request.user.is_superuser
                                     li: a(href='{% url "admin:index" %}') {% trans "Admin" %}
