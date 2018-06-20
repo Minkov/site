@@ -86,7 +86,8 @@ class SubmissionStatus(SubmissionDetailBase):
         context = super(SubmissionStatus, self).get_context_data(**kwargs)
         submission = self.object
         context['last_msg'] = event.last()
-        context['test_cases'] = submission.test_cases.all()
+        test_cases = list(submission.test_cases.all())
+        context['test_cases'] = test_cases
         context['time_limit'] = submission.problem.time_limit
         try:
             lang_limit = submission.problem.language_limits.get(language=submission.language)

@@ -54,7 +54,7 @@ class PostList(ListView):
         context['contest_count'] = Contest.objects.count()
 
         context['latest_editorials'] = Solution.objects.filter(is_public=True) \
-                                           .order_by('-publish_on', '-id')[:7]
+                                           .order_by('-publish_on', '-id')
 
         context['post_comment_counts'] = {
             int(page[2:]): count for page, count in
@@ -96,9 +96,6 @@ class PostList(ListView):
             context['open_tickets'] = filter_visible_tickets(tickets, self.request.user, profile)[:10]
         else:
             context['open_tickets'] = []
-
-        for key in context:
-            print(key, context[key])
 
         return context
 

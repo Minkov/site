@@ -187,17 +187,13 @@ block body
                     li.list-item
                         span Contests
                         strong#count-contests(count=contest_count)
-            h3 {% trans "Latest Editorials" %} #[i.fa.fa-trophy]
+            h3 {% trans "Latest Solutions" %} #[i.fa.fa-trophy]
             .sidebox-content(style="border: 0")
-                ul.list
+                ul.list.list-editorials
                     for editorial in latest_editorials
                         li.list-item
-                            a(href='{% url "problem_detail" editorial.problem.code %}', style="font-size: 1.1em")
-                                | Problem
-                                = editorial.problem.name
-                            | ,
                             a(href='{% url "problem_editorial" editorial.problem.code %}')
-                                |  Read editorial
+                                = editorial.problem.name
 
         .blog-sidebar
             if IN_CONTEST and CONTEST.contest.use_clarifications

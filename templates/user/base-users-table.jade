@@ -24,7 +24,10 @@ tbody
                 if user.avatar
                     img(src=user.avatar)
             td.user-name(class='rating {{ user.rating|rating_class }} {{ user.display_rank }}')
-                = user.user.profile.name
+                if request.user.is_authenticated and request.user.is_superuser
+                    a(href='{% url "user_page" user.user.username %}') #{user.user.profile.name}
+                else
+                    a(href='#') #{user.user.profile.name}
             td.lang
                 =user.language
             block before_point

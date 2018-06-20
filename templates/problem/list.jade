@@ -102,7 +102,7 @@ block js_media
     script.
         $(function () {
             $('#category').select2().css({'visibility': 'visible'});
-            $('#types').select2({multiple: 1, placeholder: '{% trans "Filter by type..." %}'})
+            $('#types').select2({multiple: 1, placeholder: '{% trans "Filter by tags..." %}'})
                 .css({'visibility': 'visible'});
             // This is incredibly nasty to do but it's needed because otherwise the select2 steals the focus
             $('#search').keypress(function (e) {
@@ -170,11 +170,11 @@ block js_media
         });
     script.
         $(function () {
-            $('#type').select2({multiple: 1, placeholder: '{% trans "Filter by type ..." %}'})
+            $('#type').select2({multiple: 1, placeholder: '{% trans "Filter by tags..." %}'})
                 .css({'visibility': 'visible'});
             //            $('#language').select2({multiple: 1, placeholder: '{% trans "Filter by language..." %}'})
             //                .css({'visibility': 'visible'});
-            $('#category').select2({multiple: 0, placeholder: '{% trans "Filter by category..." %}'})
+            $('#category').select2({multiple: 0, placeholder: '{% trans "Filter by difficulty..." %}'})
                 .css({'visibility': 'visible'});
 
             $('.select2, input[type=text]').css({
@@ -270,8 +270,9 @@ block body
                         if request.user.is_authenticated
                             th.solved: a(href=sort_links['solved']) #[i.fa.fa-check]#{sort_order.solved}
                         th.problem: a(href=sort_links['name']) {% trans "Problem" %}#{sort_order.name}
-                        th.category: a(href=sort_links['group']) {% trans "Category" %}#{sort_order.group}
-                        th: a(href=sort_links['type']) {% trans "Types" %}#{sort_order.type}
+                        th.category: a(href=sort_links['group']) {% trans "Difficulty" %}#{sort_order.group}
+                        th: a(href=sort_links['type']) {% trans "Tags" %}#{sort_order.type}
+                        th.solution {% trans "Solution" %}
                         th.points: a(href=sort_links['points']) {% trans "Points" %}#{sort_order.points}
                         th.ac-rate: a(href=sort_links['ac_rate']) {% trans "AC %" %}#{sort_order.ac_rate}
                         th.users: a(href=sort_links['user_count']) {% trans "Users" %}#{sort_order.user_count}
@@ -308,8 +309,14 @@ block body
                                     td.types
                                         each type in problem.types_list
                                             a(href='/problems/?type=#{type.id}')= type.full_name
-                                                if not forloop.last
-                                                    = ', '
+                                            if not forloop.last
+                                                = ', '
+                            td.solution
+                                if problem.solution
+                                    a(href='{% url "problem_editorial" problem.code %}')
+                                        | Solution
+                                else
+                                    | &nbsp;
                             td.p #{problem.points | floatformat}
                                 if problem.partial
                                     | p

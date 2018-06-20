@@ -369,11 +369,12 @@ class ProblemList(QueryStringSortMixin, TitleMixin, SolvedProblemMixin, ListView
             filter |= Q(curators=self.profile)
             filter |= Q(testers=self.profile)
 
-        queryset = Problem.objects.filter(filter).select_related('group').defer('description')
+        queryset = Problem.objects.filter(filter)\
+            .select_related('group')\
+            .select_related('solution')\
+            .defer('description')
         queryset = queryset.prefetch_related('types')
         # print (' ====== ')
-        for problem in list(queryset):
-            print(problem.types_list)
 
         if self.profile is not None and self.hide_solved:
             queryset = queryset.exclude(id__in=Submission.objects.filter(user=self.profile, points=F('problem__points'))
