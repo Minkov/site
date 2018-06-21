@@ -4,13 +4,18 @@
 *.py[co]
 *.mo
 *~
+
 dmoj/local_settings.py
 resources/style.css
 resources/content-description.css
 resources/ranks.css
 resources/table.css
+resources/oidc/aadb2cSettings.js
 sass_processed
 
 # Node.js
 
 node_modules
+
+
+
