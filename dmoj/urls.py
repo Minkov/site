@@ -24,67 +24,67 @@ from judge.views.select2 import UserSelect2View, OrganizationSelect2View, Proble
 admin.autodiscover()
 
 register_patterns = [
-#   url(r'^activate/complete/$',
-#       TitledTemplateView.as_view(template_name='registration/activation_complete.jade',
-#                                  title='Activation Successful!'),
-#       name='registration_activation_complete'),
-#   # Activation keys get matched by \w+ instead of the more specific
-#   # [a-fA-F0-9]{40} because a bad activation key should still get to the view;
-#   # that way it can return a sensible "invalid key" message instead of a
-#   # confusing 404.
-#   url(r'^activate/(?P<activation_key>\w+)/$',
-#       ActivationView.as_view(title='Activation key invalid'),
-#       name='registration_activate'),
-#     url(r'^register/$',
-#         RedirectView.as_view(url="https://telerikacademy.com/Users/Auth/Registration", permanent=False),
-#         name='registration_register'),
-#   url(r'^register/complete/$',
-#       TitledTemplateView.as_view(template_name='registration/registration_complete.jade',
-#                                  title='Registration Completed'),
-#       name='registration_complete'),
-#   url(r'^register/closed/$',
-#       TitledTemplateView.as_view(template_name='registration/registration_closed.html',
-#                                  title='Registration not allowed'),
-#       name='registration_disallowed'),
-#     url(r'^login/$', auth_views.login,
-#         {'template_name': 'registration/login.jade', 'extra_context': {'title': 'Login'},
-#          'authentication_form': CustomAuthenticationForm},
-#         name='auth_login'),
-#     url(r'^logout/$',
-#         auth_views.logout,
-#         {'template_name': 'registration/logout.jade',
-#          'extra_context': {'title': 'You have been successfully logged out.'}},
-#         name='auth_logout'),
-#     url(r'^password/change/$',
-#         auth_views.password_change,
-#         {'template_name': 'registration/password_change_form.jade', 'extra_context': {'title': 'Change Password'}},
-#         name='password_change'),
-#     url(r'^password/change/done/$',
-#         auth_views.password_change_done,
-#         {'template_name': 'registration/password_change_done.jade', 'extra_context': {'title': 'Password Changed'}},
-#         name='password_change_done'),
-#     url(r'^password/reset/$',
-#         auth_views.password_reset,
-#         {'template_name': 'registration/password_reset.jade', 'extra_context': {'title': 'Reset Password'},
-#          'html_email_template_name': 'registration/password_reset_email.html',
-#          'email_template_name': 'registration/password_reset_email.txt'},
-#         name='password_reset'),
-#     url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-#         auth_views.password_reset_confirm,
-#         {'template_name': 'registration/password_reset_confirm.jade',
-#          'extra_context': {'title': 'Confirm Reset Password'}},
-#         name='password_reset_confirm'),
-#     url(r'^password/reset/complete/$',
-#         auth_views.password_reset_complete,
-#         {'template_name': 'registration/password_reset_complete.jade',
-#          'extra_context': {'title': 'Password Reset Complete'}},
-#         name='password_reset_complete'),
-#     url(r'^password/reset/done/$',
-#         auth_views.password_reset_done,
-#         {'template_name': 'registration/password_reset_done.jade',
-#          'extra_context': {'title': 'Password Reset Successful'}},
-#         name='password_reset_done'),
-#   url(r'^social/error/$', register.social_auth_error, name='social_auth_error'),
+    #   url(r'^activate/complete/$',
+    #       TitledTemplateView.as_view(template_name='registration/activation_complete.jade',
+    #                                  title='Activation Successful!'),
+    #       name='registration_activation_complete'),
+    #   # Activation keys get matched by \w+ instead of the more specific
+    #   # [a-fA-F0-9]{40} because a bad activation key should still get to the view;
+    #   # that way it can return a sensible "invalid key" message instead of a
+    #   # confusing 404.
+    #   url(r'^activate/(?P<activation_key>\w+)/$',
+    #       ActivationView.as_view(title='Activation key invalid'),
+    #       name='registration_activate'),
+    #     url(r'^register/$',
+    #         RedirectView.as_view(url="https://telerikacademy.com/Users/Auth/Registration", permanent=False),
+    #         name='registration_register'),
+    #   url(r'^register/complete/$',
+    #       TitledTemplateView.as_view(template_name='registration/registration_complete.jade',
+    #                                  title='Registration Completed'),
+    #       name='registration_complete'),
+    #   url(r'^register/closed/$',
+    #       TitledTemplateView.as_view(template_name='registration/registration_closed.html',
+    #                                  title='Registration not allowed'),
+    #       name='registration_disallowed'),
+    #     url(r'^login/$', auth_views.login,
+    #         {'template_name': 'registration/login.jade', 'extra_context': {'title': 'Login'},
+    #          'authentication_form': CustomAuthenticationForm},
+    #         name='auth_login'),
+    #     url(r'^logout/$',
+    #         auth_views.logout,
+    #         {'template_name': 'registration/logout.jade',
+    #          'extra_context': {'title': 'You have been successfully logged out.'}},
+    #         name='auth_logout'),
+    #     url(r'^password/change/$',
+    #         auth_views.password_change,
+    #         {'template_name': 'registration/password_change_form.jade', 'extra_context': {'title': 'Change Password'}},
+    #         name='password_change'),
+    #     url(r'^password/change/done/$',
+    #         auth_views.password_change_done,
+    #         {'template_name': 'registration/password_change_done.jade', 'extra_context': {'title': 'Password Changed'}},
+    #         name='password_change_done'),
+    #     url(r'^password/reset/$',
+    #         auth_views.password_reset,
+    #         {'template_name': 'registration/password_reset.jade', 'extra_context': {'title': 'Reset Password'},
+    #          'html_email_template_name': 'registration/password_reset_email.html',
+    #          'email_template_name': 'registration/password_reset_email.txt'},
+    #         name='password_reset'),
+    #     url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+    #         auth_views.password_reset_confirm,
+    #         {'template_name': 'registration/password_reset_confirm.jade',
+    #          'extra_context': {'title': 'Confirm Reset Password'}},
+    #         name='password_reset_confirm'),
+    #     url(r'^password/reset/complete/$',
+    #         auth_views.password_reset_complete,
+    #         {'template_name': 'registration/password_reset_complete.jade',
+    #          'extra_context': {'title': 'Password Reset Complete'}},
+    #         name='password_reset_complete'),
+    #     url(r'^password/reset/done/$',
+    #         auth_views.password_reset_done,
+    #         {'template_name': 'registration/password_reset_done.jade',
+    #          'extra_context': {'title': 'Password Reset Successful'}},
+    #         name='password_reset_done'),
+    #   url(r'^social/error/$', register.social_auth_error, name='social_auth_error'),
 ]
 
 
@@ -122,7 +122,8 @@ urlpatterns = [
 
         url(r'^/rank/', paged_list_view(ranked_submission.RankedSubmissions, 'ranked_submissions')),
         url(r'^/submissions/', paged_list_view(submission.ProblemSubmissions, 'chronological_submissions')),
-        url(r'^/submissions/(?P<user>[\w\.]+)/', paged_list_view(submission.UserProblemSubmissions, 'user_submissions')),
+        url(r'^/submissions/(?P<user>[\w\.]+)/',
+            paged_list_view(submission.UserProblemSubmissions, 'user_submissions')),
 
         url(r'^/$', lambda _, problem: HttpResponsePermanentRedirect(reverse('problem_detail', args=[problem]))),
 
@@ -135,7 +136,8 @@ urlpatterns = [
     ])),
 
     url(r'^submissions/', paged_list_view(submission.AllSubmissions, 'all_submissions')),
-    url(r'^submissions/user/(?P<user>[\w\.]+)/', paged_list_view(submission.AllUserSubmissions, 'all_user_submissions')),
+    url(r'^submissions/user/(?P<user>[\w\.]+)/',
+        paged_list_view(submission.AllUserSubmissions, 'all_user_submissions')),
 
     url(r'^src/(?P<submission>\d+)$', submission.SubmissionSource.as_view(), name='submission_source'),
     url(r'^src/(?P<submission>\d+)/raw$', submission.SubmissionSourceRaw.as_view(), name='submission_source_raw'),
@@ -162,7 +164,8 @@ urlpatterns = [
             url(r'/ajax$', user.UserPerformancePointsAjax.as_view(), name='user_pp_ajax'),
         ])),
         url(r'^/submissions/', paged_list_view(submission.AllUserSubmissions, 'all_user_submissions_old')),
-        url(r'^/submissions/', lambda _, user: HttpResponsePermanentRedirect(reverse('all_user_submissions', args=[user]))),
+        url(r'^/submissions/',
+            lambda _, user: HttpResponsePermanentRedirect(reverse('all_user_submissions', args=[user]))),
 
         url(r'^/$', lambda _, user: HttpResponsePermanentRedirect(reverse('user_page', args=[user]))),
     ])),
@@ -336,6 +339,7 @@ urlpatterns = [
 ]
 
 from judge.views import oidc
+
 # from judge.views.oidc import login as oidc_login
 
 urlpatterns += [
@@ -345,6 +349,9 @@ urlpatterns += [
     url(r'^signin-oidc$', oidc.signin_oidc),
     url(r'^oidc/token$', oidc.token),
     url(r'^token$', oidc.token),
+    url(r'^accounts/.*$', RedirectView.as_view(url='/', permanent=False), name='index'),
+    url(r'^login/.*$', RedirectView.as_view(url='/oidc/login', permanent=False), name='index')
+
 ]
 
 favicon_paths = ['apple-touch-icon-180x180.png', 'apple-touch-icon-114x114.png', 'android-chrome-72x72.png',

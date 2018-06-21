@@ -151,7 +151,6 @@ class UserPerformancePointsAjax(UserMixin, DetailView):
 
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
-
 class UserAboutPage(UserPage):
     template_name = 'user/user-about.jade'
 

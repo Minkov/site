@@ -168,12 +168,18 @@ block info_float
     br
     if not contest_problem or not contest_problem.contest.hide_problem_tags
         div#problem-types
-            - with types=problem.types_list
-                span.fa.fa-tag.fa-fw
-                strong
-                    | Tags
+            span.fa.fa-tag.fa-fw
+            strong
+                | Tags
             div
                 =problem.types_list|join:", "
+
+        div#problem-types
+            span.fa.fa-level-up.fa-fw
+            strong
+                | Difficulty
+            div
+                =problem.group
         br
     if show_languages
         div#allowed-langs

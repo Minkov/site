@@ -53,7 +53,7 @@ class PostList(ListView):
         context['language_count'] = Language.objects.count()
         context['contest_count'] = Contest.objects.count()
 
-        context['latest_editorials'] = Solution.objects.filter(is_public=True) \
+        context['latest_editorials'] = Solution.objects.filter(is_public=True, problem__is_public=True) \
                                            .order_by('-publish_on', '-id')
 
         context['post_comment_counts'] = {
