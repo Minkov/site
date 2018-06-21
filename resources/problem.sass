@@ -55,6 +55,15 @@
 
   .filter-form-group
     margin-top: 5px
+    
+  .hide-solved
+    input[type='checkbox']
+      display: none
+      &:checked + span
+        display: inherit
+
+      & + span
+        display: none
 
 #content-right
   &.problems

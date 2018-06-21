@@ -248,6 +248,15 @@ block body
                                                 =full_name
 
                             div.form-submit-group
+                                label.hide-solved
+                                    if hide_solved
+                                        input(type='checkbox', value='1', name='hide_solved', checked)
+                                    else
+                                        input(type='checkbox', value='1', name='hide_solved')
+                                    span.fa.fa-check
+                                    span.button(href="#")
+                                        | Hide solved
+
                                 button#go.button(onclick='form.submit()') {% trans "Go" %}
 
         #content-left.problems
